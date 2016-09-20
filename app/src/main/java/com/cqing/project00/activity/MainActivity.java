@@ -1,9 +1,12 @@
-package com.cqing.project00;
+package com.cqing.project00.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
+
+import com.cqing.project00.R;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()){
             case R.id.btn_1 :
                 Toast.makeText(MainActivity.this,"This button will launch POPULAR MOVIES!",Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, PopularMoviesActivity.class));
                 break;
             case R.id.btn_2 :
                 Toast.makeText(MainActivity.this,"This button will launch STOCK HAWK!",Toast.LENGTH_SHORT).show();
