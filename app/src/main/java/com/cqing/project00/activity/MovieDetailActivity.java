@@ -4,17 +4,17 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.cqing.project00.R;
-import com.cqing.project00.fragment.PopularMoviesInfoFragment;
+import com.cqing.project00.fragment.PopularDetailFragment;
 
-public class PopularMoviesInfoActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_popular_movies_info);
+        setContentView(R.layout.activity_popular_detail);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PopularMoviesInfoFragment())
+                    .add(R.id.container, new PopularDetailFragment())
                     .commit();
         }
     }

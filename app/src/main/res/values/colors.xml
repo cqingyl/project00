@@ -6,6 +6,11 @@
     <color name="btnPressedColor">#095fae</color>
     <color name="btnUnpressedColor">#162a3c</color>
     <color name="textColor">#000000</color>
-    <color name="buttonColor">#ffffff</color>
+    <color name="black">#000</color>
+    <color name="white">#ffffff</color>
+    <color name="nav">#239a34</color>
+    <color name="grayLight">#cccccc</color>
+    <color name="relativeLayoutButtonPressedColor">#00a86a</color>
+    <color name="relativeLayoutButtonUnPressedColor">#00a321</color>
 
 </resources>

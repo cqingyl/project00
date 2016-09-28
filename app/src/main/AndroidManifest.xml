@@ -3,7 +3,7 @@
     package="com.cqing.project00">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -17,8 +17,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PopularMoviesActivity" />
-        <activity android:name=".activity.PopularMoviesInfoActivity"></activity>
+        <activity android:name=".activity.PopularMoviesActivity"
+            android:parentActivityName=".activity.MainActivity"
+            android:label="@string/popular_movies"
+            />
+        <activity android:name=".activity.MovieDetailActivity"
+            android:parentActivityName=".activity.PopularMoviesActivity"
+            android:label="@string/movie_detail">
+
+        </activity>
     </application>
 
 </manifest>

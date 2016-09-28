@@ -30,6 +30,9 @@ public class PopularMoviesAdapter extends BaseAdapter {
         this.mContext = mContext;
         this.mData = mData;
     }
+    public void setItemList(List<PopularMovies> list){
+        mData = list;
+    }
     @Override
     public int getCount() {
         return mData.size();
@@ -57,11 +60,13 @@ public class PopularMoviesAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         // 加载图片
-      // holder.iv.setImageResource(mData.get(position).getImgId());
         PopularMovies movies = getItem(position);
         String url = movies.getImgUrl();
-        Picasso.with(mContext).load(url).resize(200,200).into(holder.iv);
-
+        if (url == null){
+            Picasso.with(mContext).load(R.mipmap.ic_launcher).resize(185,278).into(holder.iv);
+        } else {
+            Picasso.with(mContext).load(url).into(holder.iv);
+        }
         return convertView;
     }
 

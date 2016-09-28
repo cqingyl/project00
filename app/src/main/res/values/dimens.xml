@@ -1,9 +1,27 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
+
+    <!-- main -->
+    <dimen name="btn_width">200dp</dimen>
+    <dimen name="btn_height">0dp</dimen>
+    <dimen name="btn_margin_bottom">3dp</dimen>
+
+    <!-- Popular movies -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="text_size">19sp</dimen>
-    <dimen name="column_with">150dp</dimen>
-    <dimen name="iv_width">200dp</dimen>
-    <dimen name="iv_height">200dp</dimen>
+    <dimen name="column_with">180dp</dimen>
+    <dimen name="iv_width">185dp</dimen>
+    <dimen name="iv_height">278dp</dimen>
+    <dimen name="iv_thumbnail_height">167dp</dimen>
+    <dimen name="iv_thumbnail_width">110dp</dimen>
+    <dimen name="tv_overview">15sp</dimen>
+    <dimen name="movie_detail_padding_left">15dp</dimen>
+    <dimen name="movie_detail_padding_top">10dp</dimen>
+    <dimen name="text_nav">110dp</dimen>
+    <dimen name="movie_nav_text">29sp</dimen>
+    <dimen name="radius">5dp</dimen>
+    <dimen name="relative_layout_padding_top">10dp</dimen>
+    <dimen name="relative_layout_padding_left">25dp</dimen>
+    <dimen name="text_date">26sp</dimen>
 </resources>

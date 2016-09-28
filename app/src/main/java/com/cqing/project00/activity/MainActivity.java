@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_1 :
-                Toast.makeText(MainActivity.this,"This button will launch POPULAR MOVIES!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "This button will launch POPULAR MOVIES!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, PopularMoviesActivity.class));
                 break;
             case R.id.btn_2 :
