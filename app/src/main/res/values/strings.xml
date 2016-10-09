@@ -15,5 +15,12 @@
     <string name="favorite">FAVORITE</string>
     <string name="popularity">Popularity</string>
     <string name="average">Average</string>
+    <string name="marked">you marked</string>
+    <string name="btn1_toast">This button will launch POPULAR MOVIES!</string>
+    <string name="btn2_toast">This button will launch STOCK HAWK!</string>
+    <string name="btn3_toast">This button will BUILD IT BIGGER!</string>
+    <string name="btn4_toast">This button will launch MAKE YOUR APP MATERIAL!</string>
+    <string name="btn5_toast">This button will launch GO UBIQUITOUS!</string>
+    <string name="btn6_toast">This button will launch my capstone app!</string>
 
 </resources>

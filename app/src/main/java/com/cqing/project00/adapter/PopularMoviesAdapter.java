@@ -62,11 +62,10 @@ public class PopularMoviesAdapter extends BaseAdapter {
         // 加载图片
         PopularMovies movies = getItem(position);
         String url = movies.getImgUrl();
-        if (url == null){
-            Picasso.with(mContext).load(R.mipmap.ic_launcher).resize(185,278).into(holder.iv);
-        } else {
-            Picasso.with(mContext).load(url).into(holder.iv);
-        }
+        Picasso.with(mContext)
+                .load(url)
+                .error(R.mipmap.ic_launcher)
+                .into(holder.iv);
         return convertView;
     }
 

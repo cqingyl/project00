@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
 
 import com.cqing.project00.R;
+import com.cqing.project00.utils.ToastUtil;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -26,23 +26,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_1 :
-                Toast.makeText(MainActivity.this, "This button will launch POPULAR MOVIES!", Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this, getString(R.string.btn1_toast));
                 startActivity(new Intent(this, PopularMoviesActivity.class));
                 break;
             case R.id.btn_2 :
-                Toast.makeText(MainActivity.this,"This button will launch STOCK HAWK!",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this,getString(R.string.btn2_toast));
                 break;
             case R.id.btn_3 :
-                Toast.makeText(MainActivity.this,"This button will BUILD IT BIGGER!",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this,getString(R.string.btn3_toast));
                 break;
             case R.id.btn_4 :
-                Toast.makeText(MainActivity.this,"This button will launch MAKE YOUR APP MATERIAL!",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this,getString(R.string.btn4_toast));
                 break;
             case R.id.btn_5 :
-                Toast.makeText(MainActivity.this,"This button will launch GO UBIQUITOUS!",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this,getString(R.string.btn5_toast));
                 break;
             case R.id.btn_6 :
-                Toast.makeText(MainActivity.this,"This button will launch my capstone app!",Toast.LENGTH_SHORT).show();
+                ToastUtil.show(MainActivity.this,getString(R.string.btn6_toast));
                 break;
         }
     }

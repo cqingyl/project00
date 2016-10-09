@@ -1,9 +1,6 @@
 package com.cqing.project00.fragment;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,13 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.cqing.project00.BuildConfig;
 import com.cqing.project00.R;
 import com.cqing.project00.activity.MovieDetailActivity;
 import com.cqing.project00.adapter.PopularMoviesAdapter;
+import com.cqing.project00.bean.MoviesApi;
 import com.cqing.project00.bean.PopularMovies;
+import com.cqing.project00.utils.ToastUtil;
+import com.cqing.project00.utils.Util;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,7 +42,7 @@ import java.util.Comparator;
 /**
  * Created by Cqing on 2016/9/13.
  */
-public class PopularMoviesFragment extends Fragment{
+public class PopularMoviesFragment extends Fragment {
 
     private final static String TAG_LOG = PopularMoviesFragment.class.getSimpleName();
 
@@ -56,27 +55,21 @@ public class PopularMoviesFragment extends Fragment{
     private PopularMoviesAdapter adapter;
     private ArrayList<PopularMovies> mData;
     private Bundle mBundle;
+
     public PopularMoviesFragment() {
 
-    }
-
-
-    public boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo ni = cm.getActiveNetworkInfo();
-        return ni != null && ni.isConnectedOrConnecting();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-            mData= new ArrayList<>();
-            if( isNetworkConnected() ){
-                new PopularMoviesTask(NORMAL_STATE).execute();
-            } else {
-                PopularMovies popularMovies = new PopularMovies();
-                mData.add(popularMovies);
-            }
+        mData = new ArrayList<>();
+        if (Util.isNetworkConnected(getActivity())) {
+            new PopularMoviesTask(NORMAL_STATE).execute();
+        } else {
+            PopularMovies popularMovies = new PopularMovies();
+            mData.add(popularMovies);
+        }
     }
 
     @Override
@@ -95,12 +88,16 @@ public class PopularMoviesFragment extends Fragment{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.favorite:
-                Toast.makeText(getActivity(), "favorite", Toast.LENGTH_SHORT).show();
+                ToastUtil.show(getActivity(), getString(R.string.favorite));
+                if (Util.isNetworkConnected(getActivity())) {
                     new PopularMoviesTask(POPULAR_STATE).execute();
+                }
                 return true;
             case R.id.average:
-                Toast.makeText(getActivity(), "average", Toast.LENGTH_SHORT).show();
+                ToastUtil.show(getActivity(), getString(R.string.average));
+                if (Util.isNetworkConnected(getActivity())) {
                     new PopularMoviesTask(VOTE_AVERAGE_STATE).execute();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -121,18 +118,19 @@ public class PopularMoviesFragment extends Fragment{
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), MovieDetailActivity.class);
-                if(isNetworkConnected()){
+                if (Util.isNetworkConnected(getActivity())) {
                     mBundle.putInt("position", position);
                     intent.putExtras(mBundle);
                 }
-                    startActivity(intent);
+                startActivity(intent);
             }
         });
         return rootView;
     }
+
     /**
      * Access to network resources
-     * */
+     */
     public class PopularMoviesTask extends AsyncTask<String, String, ArrayList<PopularMovies>> {
 
         private final String TAG_LOG = PopularMoviesTask.class.getSimpleName();
@@ -154,8 +152,8 @@ public class PopularMoviesFragment extends Fragment{
 
         @Override
         protected ArrayList<PopularMovies> doInBackground(String... params) {
-            String baseUrl = "http://api.themoviedb.org/3/movie/popular?";
-            String apiKey = "api_key=";
+            String baseUrl = MoviesApi.SERVICE_URL;
+            String apiKey = MoviesApi.API_KEY;
             String api = BuildConfig.THE_MOVIE_DB_API_KEY;
             try {
                 URL url = new URL(baseUrl.concat(apiKey).concat(api));
@@ -200,17 +198,17 @@ public class PopularMoviesFragment extends Fragment{
 
         /**
          * Get movie information
-         * */
+         */
         private ArrayList<PopularMovies> getPopularMoviesDataFromJson(String moviesJsonStr) throws JSONException {
 
             ArrayList<PopularMovies> list = null;
             JSONArray moviesArray = null;
-                JSONObject jsonObject = new JSONObject(moviesJsonStr);
-                final String RESULT = "results";
+            JSONObject jsonObject = new JSONObject(moviesJsonStr);
+            final String RESULT = "results";
 
-                list = new ArrayList<>();
+            list = new ArrayList<>();
 
-                moviesArray = jsonObject.getJSONArray(RESULT);
+            moviesArray = jsonObject.getJSONArray(RESULT);
             JSONObject moviesObject;
             mBundle = new Bundle();
 
@@ -218,33 +216,33 @@ public class PopularMoviesFragment extends Fragment{
             String moviesOverview;
             String moviesTitle;
             String moviesData;
-            Double moviesParpularity;
-            Double moviesAverage;
+            double moviesParpularity;
+            double moviesAverage;
             //get movie data
-            for(int i = 0; i < moviesArray.length(); i++) {
+            for (int i = 0; i < moviesArray.length(); i++) {
                 PopularMovies movies = null;
-                    moviesObject = moviesArray.getJSONObject(i);
-                    movies = new PopularMovies();
+                moviesObject = moviesArray.getJSONObject(i);
+                movies = new PopularMovies();
 
-                    moviesImgPath = getImgPath(moviesObject);
-                    movies.setImgUrl(moviesImgPath);
+                moviesImgPath = getImgPath(moviesObject);
+                movies.setImgUrl(moviesImgPath);
 
-                    moviesTitle = getTitle(moviesObject);
-                    movies.setTitle(moviesTitle);
+                moviesTitle = getTitle(moviesObject);
+                movies.setTitle(moviesTitle);
 
-                    moviesOverview = getOverview(moviesObject);
-                    movies.setOverview(moviesOverview);
+                moviesOverview = getOverview(moviesObject);
+                movies.setOverview(moviesOverview);
 
-                    moviesData = getReleaseDate(moviesObject);
-                    movies.setReleaseDate(moviesData);
+                moviesData = getReleaseDate(moviesObject);
+                movies.setReleaseDate(moviesData);
 
-                    moviesParpularity = getPopularity(moviesObject);
-                    movies.setPopularity(moviesParpularity);
+                moviesParpularity = getPopularity(moviesObject);
+                movies.setPopularity(moviesParpularity);
 
-                    moviesAverage = getAverages(moviesObject);
-                    movies.setVoteAverage(moviesAverage);
+                moviesAverage = getAverages(moviesObject);
+                movies.setVoteAverage(moviesAverage);
 
-                    list.add(movies);
+                list.add(movies);
             }
 
 
@@ -255,13 +253,13 @@ public class PopularMoviesFragment extends Fragment{
         @Override
         protected void onPostExecute(ArrayList<PopularMovies> result) {
             if (result != null) {
-                switch (state){
-                    case POPULAR_STATE :
+                switch (state) {
+                    case POPULAR_STATE:
                         Collections.sort(result, new Comparator<PopularMovies>() {
                             @Override
                             public int compare(PopularMovies lhs, PopularMovies rhs) {
                                 int i = 0;
-                                if (lhs.getPopularity() > rhs.getPopularity()){
+                                if (lhs.getPopularity() > rhs.getPopularity()) {
                                     i = -1;
                                 } else if (lhs.getPopularity() == rhs.getPopularity()) {
                                     i = 0;
@@ -276,12 +274,12 @@ public class PopularMoviesFragment extends Fragment{
                         adapter.setItemList(mData);
                         adapter.notifyDataSetChanged();
                         break;
-                    case VOTE_AVERAGE_STATE :
+                    case VOTE_AVERAGE_STATE:
                         Collections.sort(result, new Comparator<PopularMovies>() {
                             @Override
                             public int compare(PopularMovies lhs, PopularMovies rhs) {
                                 int i = 0;
-                                if (lhs.getVoteAverage() > rhs.getVoteAverage()){
+                                if (lhs.getVoteAverage() > rhs.getVoteAverage()) {
                                     i = -1;
                                 } else if (lhs.getVoteAverage() == rhs.getVoteAverage()) {
                                     i = 0;
@@ -296,7 +294,7 @@ public class PopularMoviesFragment extends Fragment{
                         adapter.setItemList(mData);
                         adapter.notifyDataSetChanged();
                         break;
-                    case NORMAL_STATE :
+                    case NORMAL_STATE:
                         mBundle.putParcelableArrayList(PAR_KEY, result);
                         mData = result;
                         adapter.setItemList(mData);
@@ -306,65 +304,90 @@ public class PopularMoviesFragment extends Fragment{
                 adapter.notifyDataSetChanged();
             }
         }
+
         /**
-         * split joint image address string and added to the list of data, and returns a list of data
-         * */
+         * get imgpath
+         */
         private String getImgPath(JSONObject moviesObject) throws JSONException {
             final String POSTER_PATH = "poster_path";
             String moviesPath;
-            moviesPath = moviesObject.getString(POSTER_PATH);
+            if (!moviesObject.isNull(POSTER_PATH)) {
 
-            String baseUrl = "http://image.tmdb.org/t/p/";
-            String picSize = "w185";
-            String imgPath = baseUrl.concat(picSize).concat(moviesPath);
-           // Log.i(TAG_LOG, imgPath);
-            return imgPath;
+                moviesPath = moviesObject.getString(POSTER_PATH);
+
+                String baseUrl = MoviesApi.SERVICE_IMAGE_URL;
+                String picSize = MoviesApi.SERVICE_IMAGE_URL_PICSIZE;
+                String imgPath = baseUrl.concat(picSize).concat(moviesPath);
+                // Log.i(TAG_LOG, imgPath);
+                return imgPath;
+            }
+            return null;
         }
+
         /**
          * get overview
-         * */
+         */
         private String getOverview(JSONObject moviesObject) throws JSONException {
 
-            final String OVER_VIEW= "overview";
+            final String OVER_VIEW = "overview";
             String moviesOverview;
-            moviesOverview = moviesObject.getString(OVER_VIEW);
-            return moviesOverview;
+            if (!moviesObject.isNull(OVER_VIEW)) {
+                moviesOverview = moviesObject.getString(OVER_VIEW);
+                return moviesOverview;
+            }
+            return null;
         }
+
         /**
-         *  get title
-         * */
+         * get title
+         */
         private String getTitle(JSONObject moviesObject) throws JSONException {
             final String TITLE = "title";
-            String title;
-            title = moviesObject.getString(TITLE);
-            return title;
+            if (!moviesObject.isNull(TITLE)) {
+                String title;
+                title = moviesObject.getString(TITLE);
+                return title;
+            }
+            return null;
         }
+
         /**
-         *  get date
-         * */
+         * get date
+         */
         private String getReleaseDate(JSONObject moviesObject) throws JSONException {
             final String RELEASE_DATE = "release_date";
-            String releaseDate;
-            releaseDate = moviesObject.getString(RELEASE_DATE);
-            return releaseDate;
+            if (!moviesObject.isNull(RELEASE_DATE)) {
+                String releaseDate;
+                releaseDate = moviesObject.getString(RELEASE_DATE);
+                return releaseDate;
+            }
+            return null;
         }
+
         /**
-         *  get popularity
-         * */
-        private Double getPopularity(JSONObject moviesObject) throws JSONException {
+         * get popularity
+         */
+        private double getPopularity(JSONObject moviesObject) throws JSONException {
             final String POPULARITY = "popularity";
-            Double popularity;
-            popularity = moviesObject.getDouble(POPULARITY);
-            return  popularity;
+            if (!moviesObject.isNull(POPULARITY)) {
+                Double popularity;
+                popularity = moviesObject.getDouble(POPULARITY);
+                return popularity;
+            }
+            return -1;
         }
+
         /**
-         *  get averages
-         * */
-        private Double getAverages(JSONObject moviesObject) throws JSONException {
+         * get averages
+         */
+        private double getAverages(JSONObject moviesObject) throws JSONException {
             final String VOTE_AVERAGE = "vote_average";
-            Double voteAverage;
-            voteAverage = moviesObject.getDouble(VOTE_AVERAGE);
-            return  voteAverage;
+            if (!moviesObject.isNull(VOTE_AVERAGE)) {
+                Double voteAverage;
+                voteAverage = moviesObject.getDouble(VOTE_AVERAGE);
+                return voteAverage;
+            }
+            return -1;
         }
     }
 }

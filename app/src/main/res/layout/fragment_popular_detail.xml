@@ -2,11 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/gv_popular_movies"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
+
     <TextView
-        style="@style/detailTitleText"
-        android:id="@+id/tv"/>
+        android:id="@+id/tv"
+        style="@style/detailTitleText" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,67 +15,97 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <RelativeLayout
+                android:id="@+id/relativeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
                 android:paddingLeft="@dimen/movie_detail_padding_left"
-                android:paddingTop="@dimen/movie_detail_padding_top"
-                android:id="@+id/relativeLayout"
-                android:layout_alignParentStart="true">
+                android:paddingTop="@dimen/movie_detail_padding_top">
 
                 <ImageView
+                    android:id="@+id/iv_movies"
                     android:layout_width="@dimen/iv_thumbnail_width"
                     android:layout_height="@dimen/iv_thumbnail_height"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentTop="true"
-                    android:layout_marginRight="@dimen/activity_horizontal_margin"
-                    android:id="@+id/iv_movies"/>
+                    android:layout_marginRight="@dimen/activity_horizontal_margin" />
+
                 <TextView
+                    android:id="@+id/tv_data"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/iv_movies"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:textSize="@dimen/text_date"
-                    android:id="@+id/tv_data"/>
+                    android:layout_toRightOf="@+id/iv_movies"
+                    android:textSize="@dimen/text_date" />
+
                 <TextView
+                    android:id="@+id/tv_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/iv_movies"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:textSize="@dimen/text_date"
-                    android:id="@+id/tv_time"/>
+                    android:layout_toRightOf="@+id/iv_movies"
+                    android:textSize="@dimen/text_date" />
+
                 <RelativeLayout
-                    style="@style/relativeLayoutButton"
+                    android:id="@+id/relativeLayout_average"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:layout_below="@+id/tv_time"
+                    android:layout_toRightOf="@+id/iv_movies">
+
+                    <TextView
+                        android:id="@+id/tv_averages1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/average"
+                        android:textSize="20sp" />
+                    <TextView
+                        android:id="@+id/tv_averages"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/tv_averages1"
+                        android:layout_alignBaseline="@+id/tv_averages1"
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:textSize="@dimen/text_date" />
+                </RelativeLayout>
+                <RelativeLayout
                     android:id="@+id/relativeLayout_btn"
-                    android:layout_below="@+id/tv_data"
-                    android:layout_toRightOf="@+id/iv_movies"
-                    >
+                    style="@style/relativeLayoutButton"
+                    android:layout_below="@+id/relativeLayout_average"
+                    android:layout_toRightOf="@+id/iv_movies">
+
+                    <TextView
+                        android:id="@+id/tv_btn_mark_as"
+                        style="@style/relativeLayoutButtonTextView"
+                        android:text="@string/mark_as" />
+
                     <TextView
                         style="@style/relativeLayoutButtonTextView"
-                        android:text="@string/mark_as"
-                        android:id="@+id/tv_btn_mark_as"/>
-                    <TextView
-                        style="@style/relativeLayoutButtonTextView"
-                        android:text="@string/favorite"
-                        android:layout_below="@+id/tv_btn_mark_as"/>
+                        android:layout_below="@+id/tv_btn_mark_as"
+                        android:text="@string/favorite" />
                 </RelativeLayout>
             </RelativeLayout>
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="@dimen/activity_vertical_margin"
+                android:layout_below="@+id/relativeLayout_btn"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
-                android:layout_below="@+id/relativeLayout">
+                android:paddingTop="@dimen/activity_vertical_margin">
+
                 <TextView
+                    android:id="@+id/tv_overview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:textSize="@dimen/tv_overview"
-                    android:id="@+id/tv_overview"
-                    />
+                    android:textSize="@dimen/tv_overview" />
             </RelativeLayout>
         </LinearLayout>
     </ScrollView>
