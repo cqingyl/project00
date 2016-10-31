@@ -3,8 +3,7 @@
     android:id="@+id/gv_popular_movies"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:columnWidth="@dimen/column_with"
-    android:numColumns="auto_fit"
+    android:numColumns="2"
     android:stretchMode="columnWidth"
     android:layout_alignParentStart="true"
     android:layout_alignParentTop="true">

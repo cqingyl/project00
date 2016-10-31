@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cqing.project00.R;
-import com.cqing.project00.bean.MoviesApi;
+import com.cqing.project00.URL;
 import com.cqing.project00.bean.PopularMovies;
 import com.cqing.project00.utils.ToastUtil;
 import com.cqing.project00.utils.Util;
@@ -35,7 +35,7 @@ public class PopularDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_popular_detail, container, false);
         if (Util.isNetworkConnected(getActivity())) {
             bundle = getActivity().getIntent().getExtras();
-            position = bundle.getInt(MoviesApi.KEY_MOVIE_POSITION);
+            position = bundle.getInt(URL.KEY_MOVIE_POSITION);
 
             ArrayList mList = bundle.getParcelableArrayList(PopularMoviesFragment.PAR_KEY);
             PopularMovies data = (PopularMovies) mList.get(position);
