@@ -29,7 +29,7 @@ public class CollectionActivity extends AppCompatActivity{
 
     public void initView(){
         lv_collecting_movie = (ListView) findViewById(R.id.lv_collecting_movie);
-        Cursor c = getContentResolver().query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, PopularDetailFragment.DETAIL_COLUMNS, "collection=0", null, null);
+        Cursor c = getContentResolver().query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, PopularDetailFragment.DETAIL_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION + "=0", null, null);
         lv_collecting_movie.setAdapter(new CollectionMovieAdapter(this, c, 0));
         lv_collecting_movie.setEmptyView(findViewById(R.id.ll_empty));
         lv_collecting_movie.setOnItemClickListener(new AdapterView.OnItemClickListener() {

@@ -146,6 +146,7 @@
                 android:layout_marginRight="@dimen/activity_vertical_margin"
                 android:background="@color/grayLine"/>
             <LinearLayout
+                android:id="@+id/ll_review"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_vertical_margin"

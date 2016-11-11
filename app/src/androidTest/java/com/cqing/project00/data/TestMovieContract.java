@@ -20,6 +20,12 @@ public class TestMovieContract extends AndroidTestCase {
        assertEquals("Error: Movie Uri doesn't match our expected result",
                uri.toString(),
                "content://com.cqing.project00/movie/789456123");
+        assertEquals("Error: Movie Uri doesn't match our expected result",
+                PopMoviesContract.VideoEntry.buildPopMoviesVideoUri(TEST_ID).toString(),
+                "content://com.cqing.project00/videos/789456123");
+        assertEquals("Error: Movie Uri doesn't match our expected result",
+                PopMoviesContract.ReviewEntry.buildPopMoviesReviewUri(TEST_ID).toString(),
+                "content://com.cqing.project00/reviews/789456123");
 
    }
 }

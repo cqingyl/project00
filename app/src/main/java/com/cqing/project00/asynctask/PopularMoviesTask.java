@@ -2,6 +2,7 @@ package com.cqing.project00.asynctask;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,8 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.Vector;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Access to network resources
@@ -42,7 +41,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
     private Context mContext;
     HttpURLConnection urlConnection = null;
     BufferedReader reader = null;
-
+    int movieId = 0;
 
     public PopularMoviesTask(Context context, int state) {
         mContext = context;
@@ -53,40 +52,33 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
     protected Void doInBackground(String... params) {
 
         String movieBaseUrl = URL.POPULAR;
-        String reviewBaseUrl = URL.REVIEW;
-        String videoBaseUrl = URL.VIDEO;
+        String reviewBaseUrl = URL.HOST;
+        String videoBaseUrl = URL.HOST;
         String apiKey = URL.API_KEY;
         String api = BuildConfig.THE_MOVIE_DB_API_KEY;
 
         try {
-            switch (state) {
-                case MOVIE_STATE:
+
                     java.net.URL movieUrl = new java.net.URL(movieBaseUrl.concat(apiKey).concat(api));
                     String moviesJsonStr = getJsonString(movieUrl);
 //                   Log.i(TAG_LOG, moviesJsonStr);
                     if (moviesJsonStr != null) {
                         getPopularMoviesDataFromJson(moviesJsonStr);
                     }
-                    break;
-                case REVIEW_STATE:
-                    if (params == null)
-                        return null;
-                    java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat(params[0]).concat(URL.API_KEY_REVIEW).concat(api));
+
+                    java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat("/").concat(String.valueOf(movieId)).concat(URL.API_KEY_REVIEW).concat(api));
                     String reviewsJsonStr = getJsonString(reviewUrl);
                     if (reviewsJsonStr != null) {
                         getPopularMoviesReviewFromJson(reviewsJsonStr);
                     }
-                    break;
-                case VIDEO_STATE:
-                    if (params == null)
-                        return null;
-                    java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat(params[0]).concat(URL.API_KEY_VIDEO).concat(api));
+
+                    java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat("/").concat(String.valueOf(movieId)).concat(URL.API_KEY_VIDEO).concat(api));
                     String videosJsonStr = getJsonString(videoUrl);
-                    break;
-                default:
-                    Log.e(TAG, "Unknown state");
-                    break;
-            }
+                    if (reviewsJsonStr != null) {
+                        getPopularMoviesVideoFromJson(videosJsonStr);
+                    }
+
+
         } catch (IOException e) {
             Log.e(TAG_LOG, e.getMessage(), e);
             e.printStackTrace();
@@ -154,16 +146,41 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, reviewId);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, author);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, content);
-            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, content);
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, url);
             cVector.add(reviewValues);
         }
-        tableBulkInsert(cVector);
+        tableBulkInsert(cVector, PopMoviesContract.ReviewEntry.CONTENT_URI);
     }
     /**
      * Get Movie trailer
      * */
-    private void getPopularMoviesTrailerFromJson(String videosJsonStr) throws JSONException{
+    private void getPopularMoviesVideoFromJson(String videosJsonStr) throws JSONException{
         final String RESULT = "results";
+        JSONObject jsonObject = new JSONObject(videosJsonStr);
+        JSONArray reviewArray = jsonObject.getJSONArray(RESULT);
+        JSONObject reviewObject;
+        Vector<ContentValues> cVector = new Vector<ContentValues>(reviewArray.length());
+        for (int i = 0; i < reviewArray.length(); i++) {
+            reviewObject = reviewArray.getJSONObject(i);
+            final String VIDEO_Id = "id";
+            final String KEY = "key";
+            final String NAME = "name";
+            final String SITE = "site";
+            final String SIZE = "size";
+            String videoId = reviewObject.getString(VIDEO_Id);
+            String key = reviewObject.getString(KEY);
+            String name = reviewObject.getString(NAME);
+            String site = reviewObject.getString(SITE);
+            String size = reviewObject.getString(SIZE);
+            ContentValues reviewValues = new ContentValues();
+            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_VIDEO_ID, videoId);
+            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_KEY, key);
+            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_NAME, name);
+            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_SITE, site);
+            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_SIZE, size);
+            cVector.add(reviewValues);
+        }
+        tableBulkInsert(cVector, PopMoviesContract.VideoEntry.CONTENT_URI);
     }
     /**
      *
@@ -182,7 +199,6 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         int adult;
         String overview;
         String release_date;
-        int id;
         String original_title;
         String original_language;
         String title;
@@ -206,7 +222,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
             release_date = getReleaseDate(moviesObject);
 
-            id = getId(moviesObject);
+            movieId = getId(moviesObject);
 
             original_title = getOriginal_title(moviesObject);
 
@@ -232,7 +248,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ADULT, adult);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_OVERVIEW, overview);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_RELEASE_DATE, release_date);
-            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ID, id);
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ID, movieId);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_TITLE, original_title);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_LANGUAGE, original_language);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_TITLE, title);
@@ -245,15 +261,15 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
             cVector.add(movieValues);
         }
-        tableBulkInsert(cVector);
+        tableBulkInsert(cVector, PopMoviesContract.PopMoviesEntry.CONTENT_URI);
 
     }
-    private void tableBulkInsert (Vector<ContentValues> cVector) {
+    private void tableBulkInsert (Vector<ContentValues> cVector, Uri uri) {
         int inserted = 0;
         if (cVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[cVector.size()];
             cVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(PopMoviesContract.PopMoviesEntry.CONTENT_URI, cvArray);
+            inserted = mContext.getContentResolver().bulkInsert(uri, cvArray);
         }
         Log.d(TAG_LOG, "PopularMoviesTask Completed. " + inserted + " Inserted");
     }

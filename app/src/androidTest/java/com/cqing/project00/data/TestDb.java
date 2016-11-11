@@ -1,9 +1,11 @@
 package com.cqing.project00.data;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 
+import com.cqing.project00.TestUtilities;
 import com.cqing.project00.data.PopMoviesContract.PopMoviesEntry;
 
 import java.util.HashSet;
@@ -71,4 +73,39 @@ public class TestDb extends AndroidTestCase {
         db.close();
     }
 
+    public void testReviewTable() {
+        insertReview();
+    }
+    public long insertReview() {
+        PopMoviesDbHelper dbHelper = new PopMoviesDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues testValues = TestUtilities.createReviewValues();
+
+        long reviewRowId;
+        reviewRowId = db.insert(PopMoviesContract.ReviewEntry.TABLE_NAME, null, testValues);
+
+        assertTrue(reviewRowId != -1);
+
+        Cursor cursor = db.query(
+                PopMoviesContract.ReviewEntry.TABLE_NAME,  // Table to Query
+                null, // all columns
+                null, // Columns for the "where" clause
+                null, // Values for the "where" clause
+                null, // columns to group by
+                null, // columns to filter by row groups
+                null // sort order
+        );
+        assertTrue( "Error: No Records returned from location query", cursor.moveToFirst() );
+
+        TestUtilities.validateCurrentRecord("Error: Location Query Validation Failed",
+                cursor, testValues);
+
+        assertFalse( "Error: More than one record returned from location query",
+                cursor.moveToNext() );
+
+        cursor.close();
+        db.close();
+        return reviewRowId;
+    }
 }

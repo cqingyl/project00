@@ -2,7 +2,6 @@ package com.cqing.project00.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,51 +48,8 @@ public class CollectionMovieAdapter extends CursorAdapter {
         viewHolder.textTitle.setText(title);
         String overview = cursor.getString(PopularDetailFragment.COL_POPMOVIES_OVERVIEW);
         viewHolder.textOverview.setText(overview);
-        Log.i("tag", url + "\n" + title + "\n" + overview + "\n");
     }
-//
-//    private Context mContext;
-//    private List<CollectionMovie> mData;
-//
-//    public CollectionMovieAdapter(Context mContext, List<CollectionMovie> mData){
-//        this.mContext = mContext;
-//        this.mData = mData;
-//    }
-//
-//    @Override
-//    public int getCount() {
-//        return mData.size();
-//    }
-//
-//    @Override
-//    public CollectionMovie getItem(int position) {
-//        return mData.get(position);
-//    }
-//
-//    @Override
-//    public long getItemId(int position) {
-//        return position;
-//    }
-//
-//    @Override
-//    public View getView(int position, View convertView, ViewGroup parent) {
-//        ViewHolder holder = null;
-//        if (convertView == null) {
-//            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_collection_movies, null);
-//            holder = new ViewHolder(convertView);
-//            convertView.setTag(holder);
-//        } else {
-//            holder = (ViewHolder) convertView.getTag();
-//        }
-//        // 加载图片
-//        CollectionMovie movies = getItem(position);
-//        String url = movies.getImgPath();
-//        Picasso.with(mContext)
-//                .load(url)
-//                .error(R.mipmap.ic_launcher)
-//                .into(holder.iv);
-//        return convertView;
-//    }
+
     public class ViewHolder {
         public ImageView iv;
         public TextView textTitle;

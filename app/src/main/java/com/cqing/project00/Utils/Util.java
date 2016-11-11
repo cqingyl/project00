@@ -22,7 +22,7 @@ public class Util {
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return ni != null && ni.isConnectedOrConnecting();
     }
-    public static Intent getYouTuBeIntent(Uri uri ){
+    public static Intent getMovieVideoIntent(Uri uri ){
         Intent i = null;
         String movieId = String.valueOf(PopMoviesContract.PopMoviesEntry.getMovieId(uri));
 
@@ -30,6 +30,19 @@ public class Util {
         String videos = "videos";
         //  /movie/{id}/videos
         Uri ii = Uri.parse("http://www.youtube.com/watch?v=cxLG2wtE7TM");
+        Uri buildUri = Uri.parse(HOST).buildUpon().appendPath(movie).appendPath(movieId).appendPath(videos).build();
+        i = new Intent(Intent.ACTION_VIEW, ii);
+        return i;
+
+    }
+    public static Intent getMoviewReviewIntent(Uri uri ){
+        Intent i = null;
+        String movieId = String.valueOf(PopMoviesContract.PopMoviesEntry.getMovieId(uri));
+
+        final String movie = "movie";
+        String videos = "videos";
+        //  /movie/{id}/videos
+        Uri ii = Uri.parse("https://www.themoviedb.org/review/5807dc6dc3a3680f2d00319f");
         Uri buildUri = Uri.parse(HOST).buildUpon().appendPath(movie).appendPath(movieId).appendPath(videos).build();
         i = new Intent(Intent.ACTION_VIEW, ii);
         return i;

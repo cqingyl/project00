@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.test.AndroidTestCase;
 
+import com.cqing.project00.data.PopMoviesContract;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +28,7 @@ public class TestUtilities extends AndroidTestCase{
         valueCursor.close();
 
     }
-    static void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
+    public static void validateCurrentRecord(String error, Cursor valueCursor, ContentValues expectedValues) {
         Set<Map.Entry<String, Object>> valueSet = expectedValues.valueSet();
         for (Map.Entry<String, Object> entry : valueSet) {
             String columnName = entry.getKey();
@@ -47,5 +49,15 @@ public class TestUtilities extends AndroidTestCase{
         contentValues.put(COLUMN_ORIGINAL_TITLE, "WTF");
         contentValues.put(COLUMN_VOTE_AVERAGE, 2.3);
         return contentValues;
+    }
+
+    public static ContentValues createReviewValues() {
+        ContentValues weatherValues = new ContentValues();
+        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, "http://1111111");
+        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, "123345");
+        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, "Bob");
+        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, "this is bla bla");
+
+        return weatherValues;
     }
 }

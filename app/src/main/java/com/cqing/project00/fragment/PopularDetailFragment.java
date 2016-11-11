@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.cqing.project00.R;
 import com.cqing.project00.activity.CollectionActivity;
+import com.cqing.project00.asynctask.PopularMoviesTask;
 import com.cqing.project00.data.PopMoviesContract;
 import com.cqing.project00.utils.ToastUtil;
 import com.cqing.project00.utils.Util;
@@ -36,7 +37,7 @@ import com.squareup.picasso.Picasso;
 public class PopularDetailFragment extends Fragment implements LoaderManager.LoaderCallbacks{
 
     private final static String LOG_TAG = PopularDetailFragment.class.getSimpleName();
-    private final static int DETAIL_LOADER = 0;
+    private final static int DETAIL_LOADER = 1;
 
     private static final String DETAIL_URI = "URI";
     private Uri mUri = null;
@@ -109,15 +110,29 @@ public class PopularDetailFragment extends Fragment implements LoaderManager.Loa
                 //获取movieId
                 Long movieId = PopMoviesContract.PopMoviesEntry.getMovieId(mUri);
                 ContentResolver contentResolver = getActivity().getContentResolver();
-                int position = contentResolver.update(PopMoviesContract.PopMoviesEntry.CONTENT_URI, values,"id=" + movieId , null);
-                Log.i(LOG_TAG, String.valueOf(position));
-
+                Cursor c = contentResolver.query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, DETAIL_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION + "=0", null, null);
+                switch (c.getCount()) {
+                    case 0 :
+                        int updateRowId = contentResolver.update(PopMoviesContract.PopMoviesEntry.CONTENT_URI, values, PopMoviesContract.PopMoviesEntry.COLUMN_ID + "=" + movieId , null);
+                        break;
+                    case 1 :
+                        int deleteRowId = contentResolver.delete(PopMoviesContract.PopMoviesEntry.CONTENT_URI,PopMoviesContract.PopMoviesEntry.COLUMN_ID + "=" + movieId , null);
+                        break;
+                }
             }
         });
         rootView.findViewById(R.id.iv_trailer).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = Util.getYouTuBeIntent(mUri);
+                Intent i = Util.getMovieVideoIntent(mUri);
+                new PopularMoviesTask(getActivity(), PopularMoviesTask.REVIEW_STATE);
+                startActivity(i);
+            }
+        });
+        rootView.findViewById(R.id.ll_review).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = Util.getMoviewReviewIntent(mUri);
                 startActivity(i);
             }
         });

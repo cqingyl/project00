@@ -65,13 +65,21 @@ public class TestProvider extends AndroidTestCase{
         assertEquals("Error: the PopMoviesEntry CONTENT_URI should return PopMoviesEntry.CONTENT_TYPE",
                 PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
 
-        long testMoiveId = 789456;
+        long testMovieId = 789456;
         // content://com.cqing.project00.data/movie
         type = mContext.getContentResolver().getType(
-                PopMoviesContract.PopMoviesEntry.buildPopMoviesWithMovieId(testMoiveId));
+                PopMoviesContract.PopMoviesEntry.buildPopMoviesWithMovieId(testMovieId));
         // vnd.android.cursor.dir/com.cqing.project00.data/movie/789456
         assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id should return PopMoviesEntry.CONTENT_ITEM_TYPE",
                 PopMoviesContract.PopMoviesEntry.CONTENT_ITEM_TYPE, type);
+        // content://com.cqing.project00.data/movie/789456/reviews
+        type = mContext.getContentResolver().getType(PopMoviesContract.PopMoviesEntry.buildPopMoviesWithReviews(testMovieId));
+        assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id and review should return PopMoviesEntry.CONTENT_TYPE",
+                PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
+        // content://com.cqing.project00.data/movie/789456/reviews
+        type = mContext.getContentResolver().getType(PopMoviesContract.PopMoviesEntry.buildPopMoviesWithVideos(testMovieId));
+        assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id and video should return PopMoviesEntry.CONTENT_TYPE",
+                PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
     }
     public void testBasicWeatherQuery() {
         // insert our test records into the database

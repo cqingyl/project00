@@ -60,13 +60,15 @@ public class PopMoviesDbHelper extends SQLiteOpenHelper {
                 PopMoviesEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL," +
                 PopMoviesEntry.COLUMN_GENRE_IDS + " TEXT," +
                 PopMoviesEntry.COLUMN_COLLECTION + " INTEGER," +
+                PopMoviesEntry.COLUMN_REVIEW_KEY + " TEXT," +
+                PopMoviesEntry.COLUMN_VIDEO_KEY + " TEXT," +
                 //把Reivew表当作外键
                 " FOREIGN KEY (" + PopMoviesEntry.COLUMN_REVIEW_KEY + ") REFERENCES " +
                 PopMoviesContract.ReviewEntry.TABLE_NAME + " (" + PopMoviesContract.ReviewEntry._ID + "), " +
                 //把video表当作外键
                 " FOREIGN KEY (" + PopMoviesEntry.COLUMN_VIDEO_KEY + ") REFERENCES " +
                 PopMoviesContract.VideoEntry.TABLE_NAME + " (" + PopMoviesContract.VideoEntry._ID + "), " +
-                //这一段sql保证了插入的时候，如果（date，loc_key）出现重复，就会替代原先的。
+                //这一段sql保证了插入的时候，如果（movie.id，movie.vote_average, movie.popularity）出现重复，就会替代原先的。
                 " UNIQUE (" + PopMoviesEntry.COLUMN_ID + ", "+ PopMoviesEntry.COLUMN_VOTE_AVERAGE + ", " + PopMoviesEntry.COLUMN_POPULARITY +
                 ") ON CONFLICT REPLACE" +
                 ");";

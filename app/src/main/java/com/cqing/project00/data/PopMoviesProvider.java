@@ -51,7 +51,7 @@ public class PopMoviesProvider extends ContentProvider {
     }
     //movie.id = ?
     private static String sMovieIdSelection =
-            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ? ";
+            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ?";
     //movie.id = ? And reviews.id = ?
     private static String sMovieIdAndReviewIdSelection =
             PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ? And " +
@@ -95,11 +95,11 @@ public class PopMoviesProvider extends ContentProvider {
         matcher.addURI(authority, PopMoviesContract.PATH_REVIEW, REVIEW);
         matcher.addURI(authority, PopMoviesContract.PATH_VIDEO, VIDEO);
         //"movie/789159"
-        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*" ,MOVIE_WITH_MOVIE_ID);
+        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*" , MOVIE_WITH_MOVIE_ID);
         //"movie/789159/reviews"
-        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*" + PopMoviesContract.ReviewEntry.TABLE_NAME,MOVIE_WITH_MOVIE_ID_WITH_REVIEWS);
+        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*/" + PopMoviesContract.ReviewEntry.TABLE_NAME, MOVIE_WITH_MOVIE_ID_WITH_REVIEWS);
         //"movie/789159/videos"
-        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*" + PopMoviesContract.VideoEntry.TABLE_NAME,MOVIE_WITH_MOVIE_ID_WITH_VIDEOS);
+        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*/" + PopMoviesContract.VideoEntry.TABLE_NAME, MOVIE_WITH_MOVIE_ID_WITH_VIDEOS);
         return matcher;
 
     }
@@ -200,6 +200,24 @@ public class PopMoviesProvider extends ContentProvider {
                 long _id = db.insert(PopMoviesContract.PopMoviesEntry.TABLE_NAME, null, values);
                 if (_id > 0) {
                     returnUri = PopMoviesContract.PopMoviesEntry.buildPopMoviesUri(_id);
+                } else {
+                    throw new SQLException("Fail to insert row into " + uri);
+                }
+                break;
+            }
+            case REVIEW: {
+                long _id = db.insert(PopMoviesContract.ReviewEntry.TABLE_NAME, null, values);
+                if (_id > 0) {
+                    returnUri = PopMoviesContract.ReviewEntry.buildPopMoviesReviewUri(_id);
+                } else {
+                    throw new SQLException("Fail to insert row into " + uri);
+                }
+                break;
+            }
+            case VIDEO: {
+                long _id = db.insert(PopMoviesContract.VideoEntry.TABLE_NAME, null, values);
+                if (_id > 0) {
+                    returnUri = PopMoviesContract.VideoEntry.buildPopMoviesVideoUri(_id);
                 } else {
                     throw new SQLException("Fail to insert row into " + uri);
                 }
