@@ -6,9 +6,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cqing.project00.BuildConfig;
-import com.cqing.project00.URL;
+import com.cqing.project00.Project00.URL;
 import com.cqing.project00.data.PopMoviesContract;
-import com.cqing.project00.fragment.PopularMoviesFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,8 +18,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.util.Vector;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Access to network resources
@@ -29,70 +29,64 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
     private final static String TAG_LOG = PopularMoviesTask.class.getSimpleName();
 
-
-    private Context mContext;
     private int state;
+    /**
+     * 选取uri
+     * movie
+     * review
+     * video
+     */
+    public final static int MOVIE_STATE = 0;
+    public final static int REVIEW_STATE = 1;
+    public final static int VIDEO_STATE = 2;
+    private Context mContext;
     HttpURLConnection urlConnection = null;
     BufferedReader reader = null;
-    String moviesJsonStr = null;
 
 
-    public PopularMoviesTask(int state, Context context) {
-        this.state = state;
+    public PopularMoviesTask(Context context, int state) {
         mContext = context;
+        this.state = state;
     }
 
     @Override
     protected Void doInBackground(String... params) {
 
-        String  baseUrl = null;
-        //判断是popular还是top rated
-        switch (state) {
-            case PopularMoviesFragment.NORMAL_STATE:
-                baseUrl = URL.POPULAR;
-                break;
-            case PopularMoviesFragment.POPULAR_STATE:
-                baseUrl = URL.POPULAR;
-                break;
-            case PopularMoviesFragment.VOTE_AVERAGE_STATE:
-                baseUrl = URL.TOP_RATED;
-                break;
-        }
-        Log.d(TAG_LOG, baseUrl);
-        if (baseUrl == null){
-            return null;
-        }
+        String movieBaseUrl = URL.POPULAR;
+        String reviewBaseUrl = URL.REVIEW;
+        String videoBaseUrl = URL.VIDEO;
         String apiKey = URL.API_KEY;
         String api = BuildConfig.THE_MOVIE_DB_API_KEY;
+
         try {
-            java.net.URL url = new java.net.URL(baseUrl.concat(apiKey).concat(api));
-
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null) {
-                return null;
+            switch (state) {
+                case MOVIE_STATE:
+                    java.net.URL movieUrl = new java.net.URL(movieBaseUrl.concat(apiKey).concat(api));
+                    String moviesJsonStr = getJsonString(movieUrl);
+//                   Log.i(TAG_LOG, moviesJsonStr);
+                    if (moviesJsonStr != null) {
+                        getPopularMoviesDataFromJson(moviesJsonStr);
+                    }
+                    break;
+                case REVIEW_STATE:
+                    if (params == null)
+                        return null;
+                    java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat(params[0]).concat(URL.API_KEY_REVIEW).concat(api));
+                    String reviewsJsonStr = getJsonString(reviewUrl);
+                    if (reviewsJsonStr != null) {
+                        getPopularMoviesReviewFromJson(reviewsJsonStr);
+                    }
+                    break;
+                case VIDEO_STATE:
+                    if (params == null)
+                        return null;
+                    java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat(params[0]).concat(URL.API_KEY_VIDEO).concat(api));
+                    String videosJsonStr = getJsonString(videoUrl);
+                    break;
+                default:
+                    Log.e(TAG, "Unknown state");
+                    break;
             }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            if ((line = reader.readLine()) != null) {
-                buffer.append(line + "\n");
-            }
-
-            if (buffer.length() == 0) {
-                return null;
-            }
-            moviesJsonStr = buffer.toString();
-//            Log.i(TAG_LOG, moviesJsonStr);
-            getPopularMoviesDataFromJson(moviesJsonStr);
-        } catch (MalformedURLException e) {
-            Log.e(TAG_LOG, e.getMessage(), e);
-            e.printStackTrace();
         } catch (IOException e) {
             Log.e(TAG_LOG, e.getMessage(), e);
             e.printStackTrace();
@@ -103,7 +97,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
-            if (reader != null){
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -115,7 +109,64 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         return null;
     }
 
+    private String getJsonString(java.net.URL url) throws IOException {
+        urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+        InputStream inputStream = urlConnection.getInputStream();
+        StringBuffer buffer = new StringBuffer();
+        if (inputStream == null) {
+            return null;
+        }
+        reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String line;
+        if ((line = reader.readLine()) != null) {
+            buffer.append(line + "\n");
+        }
+
+        if (buffer.length() == 0) {
+            return null;
+        }
+        return buffer.toString();
+    }
+
     /**
+     * Get Movie review
+     * */
+    private void getPopularMoviesReviewFromJson(String reviewsJsonStr) throws JSONException{
+        final String RESULT = "results";
+        JSONObject jsonObject = new JSONObject(reviewsJsonStr);
+        JSONArray reviewArray = jsonObject.getJSONArray(RESULT);
+        JSONObject reviewObject;
+        Vector<ContentValues> cVector = new Vector<ContentValues>(reviewArray.length());
+        for (int i = 0; i < reviewArray.length(); i++) {
+            reviewObject = reviewArray.getJSONObject(i);
+            final String REVIEW_Id = "id";
+            final String AUTHOR = "author";
+            final String CONTENT = "content";
+            final String REVIEW_URL = "url";
+            String reviewId = reviewObject.getString(REVIEW_Id);
+            String author = reviewObject.getString(AUTHOR);
+            String content = reviewObject.getString(CONTENT);
+            String url = reviewObject.getString(REVIEW_URL);
+            ContentValues reviewValues = new ContentValues();
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, reviewId);
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, author);
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, content);
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, content);
+            cVector.add(reviewValues);
+        }
+        tableBulkInsert(cVector);
+    }
+    /**
+     * Get Movie trailer
+     * */
+    private void getPopularMoviesTrailerFromJson(String videosJsonStr) throws JSONException{
+        final String RESULT = "results";
+    }
+    /**
+     *
      * Get movie information
      */
     private void getPopularMoviesDataFromJson(String moviesJsonStr) throws JSONException {
@@ -128,7 +179,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         Vector<ContentValues> cVector = new Vector<ContentValues>(moviesArray.length());
 
         String poster_path;
-        String adult;
+        int adult;
         String overview;
         String release_date;
         int id;
@@ -138,9 +189,10 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         String backdrop_path;
         double popularity;
         int vote_count;
-        String video;
+        int video;
         double vote_average;
         String genre_ids;
+
 
         //get movie data
         for (int i = 0; i < moviesArray.length(); i++) {
@@ -193,6 +245,10 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
             cVector.add(movieValues);
         }
+        tableBulkInsert(cVector);
+
+    }
+    private void tableBulkInsert (Vector<ContentValues> cVector) {
         int inserted = 0;
         if (cVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[cVector.size()];
@@ -200,11 +256,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             inserted = mContext.getContentResolver().bulkInsert(PopMoviesContract.PopMoviesEntry.CONTENT_URI, cvArray);
         }
         Log.d(TAG_LOG, "PopularMoviesTask Completed. " + inserted + " Inserted");
-
     }
-
-
-
 
     /**
      * get imgpath
@@ -251,6 +303,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return null;
     }
+
     /**
      * get original title
      */
@@ -302,22 +355,24 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return -1;
     }
+
     /**
      * get Adult
      */
-    private String getAdult(JSONObject moviesObject) throws JSONException {
+    private int getAdult(JSONObject moviesObject) throws JSONException {
         final String ADULT = "adult";
         if (!moviesObject.isNull(ADULT)) {
             boolean adult;
             adult = moviesObject.getBoolean(ADULT);
             if (adult) {
-                return "true";
+                return 0;
             } else {
-                return "false";
+                return 1;
             }
         }
-        return null;
+        return -1;
     }
+
     /**
      * get id
      */
@@ -330,6 +385,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return -1;
     }
+
     /**
      * get original language
      */
@@ -342,6 +398,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return null;
     }
+
     /**
      * get backdrop path
      */
@@ -360,6 +417,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return null;
     }
+
     /**
      * get backdrop path
      */
@@ -372,35 +430,37 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         }
         return -1;
     }
+
     /**
      * get Video
      */
-    private String getVideo (JSONObject moviesObject) throws JSONException {
+    private int getVideo(JSONObject moviesObject) throws JSONException {
         final String VIDEO = "video";
         if (!moviesObject.isNull(VIDEO)) {
             boolean video;
             video = moviesObject.getBoolean(VIDEO);
             if (video) {
-                return "true";
+                return 0;
             } else {
-                return "false";
+                return 1;
             }
         }
-        return null;
+        return -1;
     }
+
     /**
      * get genre ids
-     * */
-    private String getGenre_ids (JSONObject moviesObject) throws JSONException {
+     */
+    private String getGenre_ids(JSONObject moviesObject) throws JSONException {
         final String GENRE_IDS = "genre_ids";
         if (!moviesObject.isNull(GENRE_IDS)) {
             JSONArray array = moviesObject.getJSONArray(GENRE_IDS);
             String s = "[";
-            for (int i = 0; i < array.length(); i++){
+            for (int i = 0; i < array.length(); i++) {
                 int genre_id = array.optInt(i);
                 s = s + genre_id + ",";
             }
-            return s.substring(0, s.length()-1) + "]";
+            return s.substring(0, s.length() - 1) + "]";
         }
         return null;
     }

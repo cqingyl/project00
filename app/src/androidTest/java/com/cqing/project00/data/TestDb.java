@@ -59,6 +59,7 @@ public class TestDb extends AndroidTestCase {
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_VIDEO);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_VOTE_AVERAGE);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_GENRE_IDS);
+        locationColumnHashSet.add(PopMoviesEntry.COLUMN_COLLECTION);
 
         int columnNameIndex = c.getColumnIndex("name");
         do {

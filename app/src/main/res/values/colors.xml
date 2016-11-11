@@ -10,6 +10,7 @@
     <color name="white">#ffffff</color>
     <color name="nav">#239a34</color>
     <color name="grayLight">#cccccc</color>
+    <color name="grayLine">#515151</color>
     <color name="relativeLayoutButtonPressedColor">#00a86a</color>
     <color name="relativeLayoutButtonUnPressedColor">#00a321</color>
 

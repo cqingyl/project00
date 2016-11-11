@@ -58,6 +58,21 @@ public class TestProvider extends AndroidTestCase{
                     false);
         }
     }
+    public void testGetType() {
+        // content:/com.cqing.project00.data/movie
+        String type = mContext.getContentResolver().getType(PopMoviesContract.PopMoviesEntry.CONTENT_URI);
+        // vnd.android.cursor.dir/com.cqing.project00.data/movie
+        assertEquals("Error: the PopMoviesEntry CONTENT_URI should return PopMoviesEntry.CONTENT_TYPE",
+                PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
+
+        long testMoiveId = 789456;
+        // content://com.cqing.project00.data/movie
+        type = mContext.getContentResolver().getType(
+                PopMoviesContract.PopMoviesEntry.buildPopMoviesWithMovieId(testMoiveId));
+        // vnd.android.cursor.dir/com.cqing.project00.data/movie/789456
+        assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id should return PopMoviesEntry.CONTENT_ITEM_TYPE",
+                PopMoviesContract.PopMoviesEntry.CONTENT_ITEM_TYPE, type);
+    }
     public void testBasicWeatherQuery() {
         // insert our test records into the database
         PopMoviesDbHelper dbHelper = new PopMoviesDbHelper(mContext);

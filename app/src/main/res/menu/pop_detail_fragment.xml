@@ -2,13 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/favorite"
-        android:title="@string/popularity"
-        app:showAsAction="never"
-        ></item>
-    <item
-        android:id="@+id/average"
-        android:title="@string/average"
+        android:id="@+id/collection"
+        android:title="@string/collection"
         app:showAsAction="never"
         ></item>
 </menu>

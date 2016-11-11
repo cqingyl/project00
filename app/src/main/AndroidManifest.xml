@@ -4,7 +4,10 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- SD卡写权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 使用相机 -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -24,9 +27,10 @@
             />
         <activity android:name=".activity.MovieDetailActivity"
             android:parentActivityName=".activity.PopularMoviesActivity"
-            android:label="@string/movie_detail">
-
-        </activity>
+            android:label="@string/movie_detail"/>
+        <activity android:name=".activity.CollectionActivity"
+            android:parentActivityName=".activity.PopularMoviesActivity"
+            android:label="@string/movie_collection"/>
         <provider
             android:authorities="com.cqing.project00"
             android:name=".data.PopMoviesProvider"

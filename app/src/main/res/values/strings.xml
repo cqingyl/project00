@@ -22,5 +22,7 @@
     <string name="btn4_toast">This button will launch MAKE YOUR APP MATERIAL!</string>
     <string name="btn5_toast">This button will launch GO UBIQUITOUS!</string>
     <string name="btn6_toast">This button will launch my capstone app!</string>
+    <string name="collection">Collection</string>
+    <string name="movie_collection">MovieCollection</string>
 
 </resources>

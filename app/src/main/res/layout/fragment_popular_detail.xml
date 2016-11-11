@@ -5,13 +5,13 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/tv"
+        android:id="@+id/tv_title"
         style="@style/detailTitleText" />
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/tv">
+        android:layout_below="@+id/tv_title">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -23,7 +23,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentStart="true"
-                android:paddingLeft="@dimen/movie_detail_padding_left"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
                 android:paddingTop="@dimen/movie_detail_padding_top">
 
                 <ImageView
@@ -40,7 +41,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
                     android:layout_toRightOf="@+id/iv_movies"
-                    android:textSize="@dimen/text_date" />
+                    android:textSize="@dimen/text_date"
+                    android:textColor="@color/black"/>
 
                 <TextView
                     android:id="@+id/tv_time"
@@ -48,7 +50,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
                     android:layout_toRightOf="@+id/iv_movies"
-                    android:textSize="@dimen/text_date" />
+                    android:textSize="@dimen/text_date"
+                    android:textColor="@color/black"/>
 
                 <RelativeLayout
                     android:id="@+id/relativeLayout_average"
@@ -60,19 +63,21 @@
                     android:layout_toRightOf="@+id/iv_movies">
 
                     <TextView
-                        android:id="@+id/tv_averages1"
+                        android:id="@+id/tv_average_black"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/average"
-                        android:textSize="20sp" />
+                        android:textSize="@dimen/text_average"
+                        android:textColor="@color/black"/>
                     <TextView
                         android:id="@+id/tv_averages"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_toRightOf="@+id/tv_averages1"
-                        android:layout_alignBaseline="@+id/tv_averages1"
+                        android:layout_toRightOf="@+id/tv_average_black"
+                        android:layout_alignBaseline="@+id/tv_average_black"
                         android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                        android:textSize="@dimen/text_date" />
+                        android:textSize="@dimen/text_date"
+                        android:textColor="@color/black"/>
                 </RelativeLayout>
                 <RelativeLayout
                     android:id="@+id/relativeLayout_btn"
@@ -96,17 +101,95 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/relativeLayout_btn"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin">
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:layout_marginTop="@dimen/relative_layout_padding_top"
+                android:layout_marginBottom="@dimen/relative_layout_padding_top">
 
                 <TextView
                     android:id="@+id/tv_overview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/activity_vertical_margin"
-                    android:textSize="@dimen/tv_overview" />
+                    android:textSize="@dimen/tv_overview"
+                    android:textColor="@color/black"/>
             </RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:background="@color/grayLine"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageButton
+                    android:id="@+id/iv_trailer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/btn_play"/>
+                <TextView
+                    android:id="@+id/tv_trailer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/tv_overview"
+                    android:textColor="@color/black"
+                    android:text="trailer1"/>
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:background="@color/grayLine"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="21sp"
+                    android:textColor="@color/black"
+                    android:text="author: "/>
+                <TextView
+                    android:id="@+id/tv_review_author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="21sp"
+                    android:textColor="@color/black"
+                    android:text="Bob"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                android:layout_marginRight="@dimen/activity_vertical_margin"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/tv_overview"
+                    android:textColor="@color/black"
+                    android:text="content: "/>
+                <TextView
+                    android:id="@+id/tv_review_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/tv_overview"
+                    android:textColor="@color/black"
+                    android:text="this is great! thank for you bla bla "/>
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 
