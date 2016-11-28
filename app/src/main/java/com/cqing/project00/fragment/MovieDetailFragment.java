@@ -50,7 +50,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         Bundle args = getArguments();
         if (args != null){
             mUri = args.getParcelable(MovieDetailFragment.MOVIE_DETAIL_URI);
-            Log.i(LOG_TAG, "uri: " + mUri);
+            Log.d(LOG_TAG, "uri: " + mUri);
         }
         View rootView = inflater.inflate(R.layout.fragment_popular_detail, container, false);
         mMovieRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_recycler_view);
@@ -60,7 +60,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
         mMovieRecyclerView.setAdapter(movieDetailAdapter);
         if (mUri != null) {
         movieId = mUri.getLastPathSegment();
-            Log.i(LOG_TAG, "uri: " + movieId);
         }
         return rootView;
     }

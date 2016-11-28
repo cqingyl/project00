@@ -127,7 +127,9 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
         gridView = (GridView) rootView.findViewById(R.id.gv_popular_movies);
         adapter = new PopMoviesAdapter(getActivity(), null, 0);
         gridView.setAdapter(adapter);
-
+        View view = View.inflate(getActivity(), R.layout.empty, null);
+        ((ViewGroup)gridView.getParent()).addView(view);
+        gridView.setEmptyView(view);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

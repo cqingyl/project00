@@ -20,8 +20,6 @@ import com.cqing.project00.Project00.URL;
 import com.cqing.project00.R;
 import com.cqing.project00.data.PopMoviesContract;
 import com.cqing.project00.fragment.PopularMoviesFragment;
-import com.cqing.project00.service.PopMoviesService;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,7 +39,7 @@ import java.util.Vector;
 
 public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
-    private final static String LOG_TAG = PopMoviesService.class.getSimpleName();
+    private final static String LOG_TAG = PopMovieSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;

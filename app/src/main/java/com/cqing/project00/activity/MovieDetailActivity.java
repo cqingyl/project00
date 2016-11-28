@@ -2,8 +2,6 @@ package com.cqing.project00.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import com.cqing.project00.R;
 import com.cqing.project00.fragment.MovieDetailFragment;
@@ -24,21 +22,5 @@ public class MovieDetailActivity extends AppCompatActivity {
                     .add(R.id.popular_movie_detail_container, fragment)
                     .commit();
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.collection:
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.pop_detail_fragment, menu);
-        return true;
-
     }
 }

@@ -43,26 +43,6 @@ public class PopMoviesProvider extends ContentProvider {
         movieWithReviewSqLiteQueryBuilder.setTables(PopMoviesContract.ReviewEntry.TABLE_NAME);
         movieWithVideoSqLiteQueryBuilder = new SQLiteQueryBuilder();
         movieWithVideoSqLiteQueryBuilder.setTables(PopMoviesContract.VideoEntry.TABLE_NAME);
-//        movieWithReviewSqLiteQueryBuilder = new SQLiteQueryBuilder();
-//        //select * from movie LEFT JOIN reviews ON movie.movie_id = reviews.review_movie_id
-//        movieWithReviewSqLiteQueryBuilder.setTables(
-//                PopMoviesContract.PopMoviesEntry.TABLE_NAME +
-//                        " LEFT JOIN " + PopMoviesContract.ReviewEntry.TABLE_NAME +
-//                        " ON " + PopMoviesContract.PopMoviesEntry.TABLE_NAME +
-//                        "." + PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID +
-//                        " = " + PopMoviesContract.ReviewEntry.TABLE_NAME +
-//                        "." + PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID
-//        );
-//        movieWithVideoSqLiteQueryBuilder = new SQLiteQueryBuilder();
-//        //select * from movie LEFT JOIN videos ON movie.movie_id = videos.video_movie_id
-//        movieWithVideoSqLiteQueryBuilder.setTables(
-//                PopMoviesContract.PopMoviesEntry.TABLE_NAME +
-//                        " LEFT JOIN " + PopMoviesContract.VideoEntry.TABLE_NAME +
-//                        " ON " + PopMoviesContract.PopMoviesEntry.TABLE_NAME +
-//                        "." + PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID +
-//                        " = " + PopMoviesContract.VideoEntry.TABLE_NAME +
-//                        "." + PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID
-//        );
     }
     //movie.movie_id = ?
     private static String sMovieIdSelection =
