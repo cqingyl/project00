@@ -43,8 +43,6 @@
             android:name=".data.PopMoviesProvider"
             android:authorities="com.cqing.project00" />
 
-        <service android:name=".service.PopMoviesService" />
-        <receiver android:name=".service.PopMoviesService$AlarmReceiver" android:enabled="true"/>
         <!-- SyncAdapter's dummy authentication service -->
         <service android:name=".sync.PopMovieAuthenticatorService">
             <intent-filter>
