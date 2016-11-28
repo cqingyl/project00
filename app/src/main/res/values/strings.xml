@@ -13,6 +13,8 @@
     <string name="title_activity_settings">Settings</string>
     <string name="mark_as">MARK AS</string>
     <string name="favorite">FAVORITE</string>
+    <string name="cancel">CANCEL</string>
+    <string name="cancel_collection">COLLECTION</string>
     <string name="popularity">Popularity</string>
     <string name="average">Average</string>
     <string name="marked">you marked</string>
@@ -25,4 +27,7 @@
     <string name="collection">Collection</string>
     <string name="movie_collection">MovieCollection</string>
 
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">project00.cqing.com</string>
+    <string name="content_authority">com.cqing.project00</string>
 </resources>

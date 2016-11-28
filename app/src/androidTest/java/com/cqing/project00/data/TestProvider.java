@@ -22,6 +22,16 @@ public class TestProvider extends AndroidTestCase{
                 null,
                 null
         );
+        mContext.getContentResolver().delete(
+                PopMoviesContract.ReviewEntry.CONTENT_URI,
+                null,
+                null
+        );
+        mContext.getContentResolver().delete(
+                PopMoviesContract.VideoEntry.CONTENT_URI,
+                null,
+                null
+        );
 
         Cursor cursor = mContext.getContentResolver().query(
                 PopMoviesContract.PopMoviesEntry.CONTENT_URI,
@@ -80,27 +90,60 @@ public class TestProvider extends AndroidTestCase{
         type = mContext.getContentResolver().getType(PopMoviesContract.PopMoviesEntry.buildPopMoviesWithVideos(testMovieId));
         assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id and video should return PopMoviesEntry.CONTENT_TYPE",
                 PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
+        // content://com.cqing.project00.data/movie/789456/merge
+        type = mContext.getContentResolver().getType(PopMoviesContract.PopMoviesEntry.buildPopMoviesWithRT(testMovieId));
+        assertEquals("Error: the PopMoviesEntry CONTENT_URI with movie id and merge should return PopMoviesEntry.CONTENT_TYPE",
+                PopMoviesContract.PopMoviesEntry.CONTENT_TYPE, type);
     }
     public void testBasicWeatherQuery() {
         // insert our test records into the database
         PopMoviesDbHelper dbHelper = new PopMoviesDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues testValues = TestUtilities.createValues();
+        ContentValues testValues1 = TestUtilities.createValues();
 
-        long popMovieRowId = db.insert(PopMoviesContract.PopMoviesEntry.TABLE_NAME, null, testValues);
+        long popMovieRowId = db.insert(PopMoviesContract.PopMoviesEntry.TABLE_NAME, null, testValues1);
         assertTrue("Unable to Insert PopMovieEntry into the Database", popMovieRowId != -1);
 
-        db.close();
 
-        Cursor cursor = mContext.getContentResolver().query(
+        //movie
+        Cursor cursor1 = mContext.getContentResolver().query(
                 PopMoviesContract.PopMoviesEntry.CONTENT_URI,
                 null,
                 null,
                 null,
                 null
         );
-        TestUtilities.validateCursor("testBasicMovieQueries, movie query", cursor, testValues);
+        TestUtilities.validateCursor("testBasicMovieQueries, movie query", cursor1, testValues1);
+        cursor1.close();
+        //review
+
+        ContentValues testValues2 = TestUtilities.createReviewValues();
+        popMovieRowId = db.insert(PopMoviesContract.ReviewEntry.TABLE_NAME, null, testValues2);
+        assertTrue("Unable to Insert PopMovieEntry into the Database", popMovieRowId != -1);
+
+        Cursor cursor2 = mContext.getContentResolver().query(
+                PopMoviesContract.ReviewEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        TestUtilities.validateCursor("testBasicMovieQueries, movie query", cursor2, testValues2);
+        //video
+        ContentValues testValues3 = TestUtilities.createVideoValues();
+        popMovieRowId = db.insert(PopMoviesContract.VideoEntry.TABLE_NAME, null, testValues3);
+        assertTrue("Unable to Insert PopMovieEntry into the Database", popMovieRowId != -1);
+
+        Cursor cursor3 = mContext.getContentResolver().query(
+                PopMoviesContract.VideoEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        TestUtilities.validateCursor("testBasicMovieQueries, movie query", cursor3, testValues3);
+        db.close();
     }
 
 }

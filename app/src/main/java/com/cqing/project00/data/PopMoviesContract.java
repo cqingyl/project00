@@ -26,11 +26,12 @@ public class PopMoviesContract {
         public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_VIDEO;
 
         public static final String TABLE_NAME = "videos";
-        public static final String CONTENT_VIDEO_ID = "video_id";
-        public static final String CONTENT_KEY = "name";
-        public static final String CONTENT_NAME = "KEY";
-        public static final String CONTENT_SITE = "site";
-        public static final String CONTENT_SIZE = "size";
+        public static final String COLUMN_VIDEO_ID = "video_id";
+        public static final String COLUMN_MOVIE_ID = "video_movie_id";
+        public static final String COLUMN_KEY = "key";
+        public static final String COLUMN_NAME = "name";
+        public static final String COLUMN_SITE = "site";
+        public static final String COLUMN_SIZE = "size";
 
         public static Uri buildPopMoviesVideoUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -47,6 +48,7 @@ public class PopMoviesContract {
 
         public static final String TABLE_NAME = "reviews";
         public static final String COLUMN_REVIEW_ID = "review_id";
+        public static final String COLUMN_MOVIE_ID = "review_movie_id";
         public static final String COLUMN_AUTHOR = "author";
         public static final String COLUMN_CONTENT = "content";
         public static final String COLUMN_REVIEW_URL = "url";
@@ -69,7 +71,7 @@ public class PopMoviesContract {
         public static final String COLUMN_ADULT = "adult";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_RELEASE_DATE = "release_date";
-        public static final String COLUMN_ID = "movie_id";
+        public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_ORIGINAL_TITLE = "original_title";
         public static final String COLUMN_ORIGINAL_LANGUAGE = "original_language";
         public static final String COLUMN_TITLE = "title";
@@ -98,6 +100,8 @@ public class PopMoviesContract {
         public static Uri buildPopMoviesWithVideos(long movieId) {
             return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).appendPath(VideoEntry.TABLE_NAME).build();
         }
+        public static Uri buildPopMoviesWithRT(long movieId) {
+            return CONTENT_URI.buildUpon().appendPath(String.valueOf(movieId)).appendPath(PopMoviesProvider.MERGE).build();
+        }
     }
-
 }

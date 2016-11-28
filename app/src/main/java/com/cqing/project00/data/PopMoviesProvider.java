@@ -5,10 +5,12 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MergeCursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 
 /**
@@ -22,70 +24,78 @@ public class PopMoviesProvider extends ContentProvider {
     static final int POPMOVIE = 100;
     static final int REVIEW = 101;
     static final int VIDEO = 102;
+    public static final String MERGE = "merge";
 
     static final int MOVIE_WITH_MOVIE_ID = 103;
     static final int MOVIE_WITH_MOVIE_ID_WITH_REVIEWS = 104;
     static final int MOVIE_WITH_MOVIE_ID_WITH_VIDEOS = 105;
+    static final int MOVIE_WITH_MOVIE_ID_WITH_MERGE = 106;
 
     private PopMoviesDbHelper mOpenHelper;
-    private static final SQLiteQueryBuilder sqLiteQueryBuilder;
+    public static final SQLiteQueryBuilder sqLiteQueryBuilder;
+    public static final SQLiteQueryBuilder movieWithReviewSqLiteQueryBuilder;
+    public static final SQLiteQueryBuilder movieWithVideoSqLiteQueryBuilder;
 
     static {
         sqLiteQueryBuilder = new SQLiteQueryBuilder();
-        //(movie INNER JOIN review ON movie.review_id = review._id) INNER JOIN video ON movie.video_id = video._id
-        sqLiteQueryBuilder.setTables(
-                "(" +
-                PopMoviesContract.PopMoviesEntry.TABLE_NAME + " INNER JOIN " +
-                        PopMoviesContract.ReviewEntry.TABLE_NAME +
-                        " ON " + PopMoviesContract.PopMoviesEntry.TABLE_NAME +
-                        "." + PopMoviesContract.PopMoviesEntry.COLUMN_REVIEW_KEY +
-                        " = " + PopMoviesContract.ReviewEntry.TABLE_NAME +
-                        "." +PopMoviesContract.ReviewEntry._ID +
-                        ") INNER JOIN " + PopMoviesContract.VideoEntry.TABLE_NAME +
-                        " ON " +
-                        PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." +
-                        PopMoviesContract.PopMoviesEntry.COLUMN_VIDEO_KEY +
-                        " = " + PopMoviesContract.VideoEntry.TABLE_NAME +
-                        "." + PopMoviesContract.VideoEntry._ID
-        );
+        sqLiteQueryBuilder.setTables(PopMoviesContract.PopMoviesEntry.TABLE_NAME);
+        movieWithReviewSqLiteQueryBuilder = new SQLiteQueryBuilder();
+        movieWithReviewSqLiteQueryBuilder.setTables(PopMoviesContract.ReviewEntry.TABLE_NAME);
+        movieWithVideoSqLiteQueryBuilder = new SQLiteQueryBuilder();
+        movieWithVideoSqLiteQueryBuilder.setTables(PopMoviesContract.VideoEntry.TABLE_NAME);
+//        movieWithReviewSqLiteQueryBuilder = new SQLiteQueryBuilder();
+//        //select * from movie LEFT JOIN reviews ON movie.movie_id = reviews.review_movie_id
+//        movieWithReviewSqLiteQueryBuilder.setTables(
+//                PopMoviesContract.PopMoviesEntry.TABLE_NAME +
+//                        " LEFT JOIN " + PopMoviesContract.ReviewEntry.TABLE_NAME +
+//                        " ON " + PopMoviesContract.PopMoviesEntry.TABLE_NAME +
+//                        "." + PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID +
+//                        " = " + PopMoviesContract.ReviewEntry.TABLE_NAME +
+//                        "." + PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID
+//        );
+//        movieWithVideoSqLiteQueryBuilder = new SQLiteQueryBuilder();
+//        //select * from movie LEFT JOIN videos ON movie.movie_id = videos.video_movie_id
+//        movieWithVideoSqLiteQueryBuilder.setTables(
+//                PopMoviesContract.PopMoviesEntry.TABLE_NAME +
+//                        " LEFT JOIN " + PopMoviesContract.VideoEntry.TABLE_NAME +
+//                        " ON " + PopMoviesContract.PopMoviesEntry.TABLE_NAME +
+//                        "." + PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID +
+//                        " = " + PopMoviesContract.VideoEntry.TABLE_NAME +
+//                        "." + PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID
+//        );
     }
-    //movie.id = ?
+    //movie.movie_id = ?
     private static String sMovieIdSelection =
-            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ?";
-    //movie.id = ? And reviews.id = ?
-    private static String sMovieIdAndReviewIdSelection =
-            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ? And " +
-                    PopMoviesContract.ReviewEntry.TABLE_NAME + "." + PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID + " = ?";
-    //movie.id = ? And videos.id = ?
-    private static String sMovieIdAndVideoIdSelection =
-            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_ID + " = ? And " +
-                    PopMoviesContract.VideoEntry.TABLE_NAME + "." + PopMoviesContract.VideoEntry.CONTENT_VIDEO_ID + " = ?";
-    //当uri为"movie/*"时
-    private Cursor getMovieByMovieId (Uri uri, String[] projection, String sortOrder) {
+            PopMoviesContract.PopMoviesEntry.TABLE_NAME + "." + PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID + " = ?";
+    //videos.video_movie_id = ? AND videos.video_id = IS NOT NULL
+    private String sMovieIdInVideoSelection =
+            PopMoviesContract.VideoEntry.TABLE_NAME + "." + PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID + " = ? AND " +
+                    PopMoviesContract.VideoEntry.TABLE_NAME + "." + PopMoviesContract.VideoEntry.COLUMN_VIDEO_ID + " IS NOT NULL";
+
+    //reviews.review_movie_id = ? AND reviews.review_id = IS NOT NULL
+    private String sMovieIdInReviewSelection =
+            PopMoviesContract.ReviewEntry.TABLE_NAME + "." + PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID + " = ? AND " +
+            PopMoviesContract.ReviewEntry.TABLE_NAME + "." + PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID + " IS NOT NULL";
+
+    @Nullable
+    private Cursor getMovieByMovieIdAndReviewOrVideo (Uri uri, String[] projection, String sortOrder, int path) {
         Long  movieId = PopMoviesContract.PopMoviesEntry.getMovieId(uri);
         String selection;
         String []selectionArgs;
-        selection = sMovieIdSelection;
         selectionArgs = new String[] {String.valueOf(movieId)};
-        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
-    }
-    //当uri为"movie/*/reviews"时
-    private Cursor getMovieByMovieIdAndReview (Uri uri, String[] projection, String sortOrder) {
-        Long  movieId = PopMoviesContract.PopMoviesEntry.getMovieId(uri);
-        String selection;
-        String []selectionArgs;
-        selection = sMovieIdAndReviewIdSelection;
-        selectionArgs = new String[] {String.valueOf(movieId)};
-        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
-    }
-    //当uri为"movie/*/videos"时
-    private Cursor getMovieByMovieIdAndVideo (Uri uri, String[] projection, String sortOrder) {
-        Long  movieId = PopMoviesContract.PopMoviesEntry.getMovieId(uri);
-        String selection;
-        String []selectionArgs;
-        selection = sMovieIdAndVideoIdSelection;
-        selectionArgs = new String[] {String.valueOf(movieId)};
-        return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+        switch (path) {
+            case MOVIE_WITH_MOVIE_ID :
+                selection = sMovieIdSelection;
+                return sqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+            case MOVIE_WITH_MOVIE_ID_WITH_REVIEWS :
+                selection = sMovieIdInReviewSelection;
+                return movieWithReviewSqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+            case MOVIE_WITH_MOVIE_ID_WITH_VIDEOS :
+                selection = sMovieIdInVideoSelection;
+                return movieWithVideoSqLiteQueryBuilder.query(mOpenHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
     static UriMatcher buildUriMatcher () {
 
@@ -100,8 +110,9 @@ public class PopMoviesProvider extends ContentProvider {
         matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*/" + PopMoviesContract.ReviewEntry.TABLE_NAME, MOVIE_WITH_MOVIE_ID_WITH_REVIEWS);
         //"movie/789159/videos"
         matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*/" + PopMoviesContract.VideoEntry.TABLE_NAME, MOVIE_WITH_MOVIE_ID_WITH_VIDEOS);
+        //"movie/789159/merge"
+        matcher.addURI(authority, PopMoviesContract.PATH_POPMOVIE + "/*/" + MERGE, MOVIE_WITH_MOVIE_ID_WITH_MERGE);
         return matcher;
-
     }
 
     @Override
@@ -126,7 +137,8 @@ public class PopMoviesProvider extends ContentProvider {
                 return PopMoviesContract.PopMoviesEntry.CONTENT_TYPE;
             case MOVIE_WITH_MOVIE_ID_WITH_VIDEOS :
                 return PopMoviesContract.PopMoviesEntry.CONTENT_TYPE;
-
+            case MOVIE_WITH_MOVIE_ID_WITH_MERGE :
+                return PopMoviesContract.PopMoviesEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -147,19 +159,21 @@ public class PopMoviesProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
-                break;
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
             // "reviews"
             case REVIEW :
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         PopMoviesContract.ReviewEntry.TABLE_NAME,
                         projection,
-                        selection,
+                        sMovieIdInReviewSelection,
                         selectionArgs,
                         null,
                         null,
                         sortOrder
                 );
-                break;
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
             // "videos"
             case VIDEO :
                 retCursor = mOpenHelper.getReadableDatabase().query(
@@ -171,24 +185,41 @@ public class PopMoviesProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
-                break;
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
             // "movie/*"
             case MOVIE_WITH_MOVIE_ID :
-                retCursor = getMovieByMovieId(uri, projection, sortOrder);
-                break;
-            // "movie/*/review"
+                retCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID);
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
+            // "movie/*/reviews"
             case MOVIE_WITH_MOVIE_ID_WITH_REVIEWS :
-                retCursor = getMovieByMovieIdAndReview(uri, projection, sortOrder);
-                break;
-            // "movie/*/video"
+                retCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID_WITH_REVIEWS);
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
+            // "movie/*/videos"
             case MOVIE_WITH_MOVIE_ID_WITH_VIDEOS :
-                retCursor = getMovieByMovieIdAndVideo(uri, projection, sortOrder);
-                break;
+                retCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID_WITH_VIDEOS);
+                retCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                return retCursor;
+            // "movie/*/merge"
+            case MOVIE_WITH_MOVIE_ID_WITH_MERGE :
+                // "movie/*"
+                Cursor detailCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID);
+                // "movie/*/reviews"
+                Cursor reviewCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID_WITH_REVIEWS);
+                // "movie/*/videos"
+                Cursor videoCursor = getMovieByMovieIdAndReviewOrVideo(uri, projection, sortOrder, MOVIE_WITH_MOVIE_ID_WITH_VIDEOS);
+
+                Cursor [] cursors = new Cursor[]{detailCursor, reviewCursor,videoCursor };
+                MergeCursor mergeCursor = new MergeCursor(cursors);
+                mergeCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                mergeCursor.setNotificationUri(getContext().getContentResolver(), PopMoviesContract.PopMoviesEntry.CONTENT_URI);
+                return mergeCursor;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        retCursor.setNotificationUri(getContext().getContentResolver(), uri);
-        return retCursor;
+
     }
 
     @Override
@@ -241,6 +272,12 @@ public class PopMoviesProvider extends ContentProvider {
             case POPMOVIE:
                 rowsDeleted = db.delete(PopMoviesContract.PopMoviesEntry.TABLE_NAME, selection, selectionArgs);
                 break;
+            case REVIEW:
+                rowsDeleted = db.delete(PopMoviesContract.ReviewEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case VIDEO:
+                rowsDeleted = db.delete(PopMoviesContract.VideoEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -256,6 +293,16 @@ public class PopMoviesProvider extends ContentProvider {
         int rowUpdate;
         switch (sUriMatcher.match(uri)){
             case POPMOVIE:
+                rowUpdate = db.update(PopMoviesContract.PopMoviesEntry.TABLE_NAME, values, selection, selectionArgs);
+//                getContext().getContentResolver().notifyChange(mergeUri, null);
+                break;
+            case REVIEW:
+                rowUpdate = db.update(PopMoviesContract.ReviewEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case VIDEO:
+                rowUpdate = db.update(PopMoviesContract.VideoEntry.TABLE_NAME, values, selection, selectionArgs);
+                break;
+            case MOVIE_WITH_MOVIE_ID_WITH_MERGE:
                 rowUpdate = db.update(PopMoviesContract.PopMoviesEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
             default:

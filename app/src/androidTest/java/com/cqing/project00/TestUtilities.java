@@ -9,7 +9,7 @@ import com.cqing.project00.data.PopMoviesContract;
 import java.util.Map;
 import java.util.Set;
 
-import static com.cqing.project00.data.PopMoviesContract.PopMoviesEntry.COLUMN_ID;
+import static com.cqing.project00.data.PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID;
 import static com.cqing.project00.data.PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_TITLE;
 import static com.cqing.project00.data.PopMoviesContract.PopMoviesEntry.COLUMN_OVERVIEW;
 import static com.cqing.project00.data.PopMoviesContract.PopMoviesEntry.COLUMN_POSTER_PATH;
@@ -45,19 +45,28 @@ public class TestUtilities extends AndroidTestCase{
         contentValues.put(COLUMN_POSTER_PATH, "123.img");
         contentValues.put(COLUMN_OVERVIEW, "this is ...");
         contentValues.put(COLUMN_RELEASE_DATE, "2013-12-1");
-        contentValues.put(COLUMN_ID, 789456);
+        contentValues.put(COLUMN_MOVIE_ID, 1000001);
         contentValues.put(COLUMN_ORIGINAL_TITLE, "WTF");
         contentValues.put(COLUMN_VOTE_AVERAGE, 2.3);
         return contentValues;
     }
 
     public static ContentValues createReviewValues() {
-        ContentValues weatherValues = new ContentValues();
-        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, "http://1111111");
-        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, "123345");
-        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, "Bob");
-        weatherValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, "this is bla bla");
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, "http://1111111");
+        contentValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, 101);
+        contentValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, "Bob");
+        contentValues.put(PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID, 1000001);
+        contentValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, "this is bla bla");
 
-        return weatherValues;
+        return contentValues;
+    }
+
+    public static ContentValues createVideoValues() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(PopMoviesContract.VideoEntry.COLUMN_VIDEO_ID, 123);
+        contentValues.put(PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID, 1000001);
+
+        return contentValues;
     }
 }

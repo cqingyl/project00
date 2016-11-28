@@ -5,5 +5,5 @@
         android:id="@+id/collection"
         android:title="@string/collection"
         app:showAsAction="never"
-        ></item>
+        />
 </menu>

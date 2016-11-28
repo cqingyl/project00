@@ -1,56 +1,42 @@
 package com.cqing.project00.utils;
 
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
-
-import com.cqing.project00.data.PopMoviesContract;
-
-import static com.cqing.project00.Project00.URL.HOST;
 
 /**
  * Created by Cqing on 2016/10/9.
  */
 
 public class Util {
-    private Util(){}
+    private Util() {
+    }
 
     public static boolean isNetworkConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return ni != null && ni.isConnectedOrConnecting();
     }
-    public static Intent getMovieVideoIntent(Uri uri ){
-        Intent i = null;
-        String movieId = String.valueOf(PopMoviesContract.PopMoviesEntry.getMovieId(uri));
-
-        final String movie = "movie";
-        String videos = "videos";
-        //  /movie/{id}/videos
-        Uri ii = Uri.parse("http://www.youtube.com/watch?v=cxLG2wtE7TM");
-        Uri buildUri = Uri.parse(HOST).buildUpon().appendPath(movie).appendPath(movieId).appendPath(videos).build();
-        i = new Intent(Intent.ACTION_VIEW, ii);
-        return i;
-
+    public  static boolean isPkgInstalled(Context context, String pkgName) {
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = context.getPackageManager().getPackageInfo(pkgName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            packageInfo = null;
+            e.printStackTrace();
+        }
+        if (packageInfo == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
-    public static Intent getMoviewReviewIntent(Uri uri ){
-        Intent i = null;
-        String movieId = String.valueOf(PopMoviesContract.PopMoviesEntry.getMovieId(uri));
 
-        final String movie = "movie";
-        String videos = "videos";
-        //  /movie/{id}/videos
-        Uri ii = Uri.parse("https://www.themoviedb.org/review/5807dc6dc3a3680f2d00319f");
-        Uri buildUri = Uri.parse(HOST).buildUpon().appendPath(movie).appendPath(movieId).appendPath(videos).build();
-        i = new Intent(Intent.ACTION_VIEW, ii);
-        return i;
-
-    }
-    /**
-     * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
-     */
+        /**
+         * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
+         */
     public static int dip2px(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
@@ -63,7 +49,6 @@ public class Util {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
     }
-
 
 
 }

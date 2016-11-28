@@ -1,14 +1,19 @@
-package com.cqing.project00.asynctask;
+package com.cqing.project00.service;
 
+import android.app.IntentService;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.cqing.project00.BuildConfig;
 import com.cqing.project00.Project00.URL;
 import com.cqing.project00.data.PopMoviesContract;
+import com.cqing.project00.fragment.PopularMoviesFragment;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,71 +24,68 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 /**
- * Access to network resources
+ * Created by Cqing on 2016/11/16.
  */
-public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
-    private final static String TAG_LOG = PopularMoviesTask.class.getSimpleName();
+public class PopMoviesService extends IntentService {
 
-    private int state;
-    /**
-     * 选取uri
-     * movie
-     * review
-     * video
-     */
-    public final static int MOVIE_STATE = 0;
-    public final static int REVIEW_STATE = 1;
-    public final static int VIDEO_STATE = 2;
-    private Context mContext;
-    HttpURLConnection urlConnection = null;
-    BufferedReader reader = null;
-    int movieId = 0;
+    private final static String LOG_TAG = PopMoviesService.class.getSimpleName();
 
-    public PopularMoviesTask(Context context, int state) {
-        mContext = context;
-        this.state = state;
+    private HttpURLConnection urlConnection = null;
+    private BufferedReader reader = null;
+    //存放电影id
+    private List<Integer> movieIdList;
+
+    private ContentResolver contentResolver;
+
+
+    public PopMoviesService() {
+        super("PopMoviesService");
     }
 
-    @Override
-    protected Void doInBackground(String... params) {
 
+    @Override
+    protected void onHandleIntent(Intent intent) {
+
+        contentResolver = this.getContentResolver();
+        movieIdList = new ArrayList();
         String movieBaseUrl = URL.POPULAR;
         String reviewBaseUrl = URL.HOST;
         String videoBaseUrl = URL.HOST;
         String apiKey = URL.API_KEY;
         String api = BuildConfig.THE_MOVIE_DB_API_KEY;
-
         try {
-
-                    java.net.URL movieUrl = new java.net.URL(movieBaseUrl.concat(apiKey).concat(api));
-                    String moviesJsonStr = getJsonString(movieUrl);
+            java.net.URL movieUrl = new java.net.URL(movieBaseUrl.concat(apiKey).concat(api));
+            String moviesJsonStr = getJsonString(movieUrl);
 //                   Log.i(TAG_LOG, moviesJsonStr);
-                    if (moviesJsonStr != null) {
-                        getPopularMoviesDataFromJson(moviesJsonStr);
-                    }
+            if (moviesJsonStr != null) {
+                getPopularMoviesDataFromJson(moviesJsonStr);
+            }
 
-                    java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat("/").concat(String.valueOf(movieId)).concat(URL.API_KEY_REVIEW).concat(api));
-                    String reviewsJsonStr = getJsonString(reviewUrl);
-                    if (reviewsJsonStr != null) {
-                        getPopularMoviesReviewFromJson(reviewsJsonStr);
-                    }
+            for (int i = 0; i < movieIdList.size(); i++) {
 
-                    java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat("/").concat(String.valueOf(movieId)).concat(URL.API_KEY_VIDEO).concat(api));
-                    String videosJsonStr = getJsonString(videoUrl);
-                    if (reviewsJsonStr != null) {
-                        getPopularMoviesVideoFromJson(videosJsonStr);
-                    }
-
+                java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat("/").concat(String.valueOf(movieIdList.get(i))).concat(URL.API_KEY_REVIEW).concat(api));
+                String reviewsJsonStr = getJsonString(reviewUrl);
+                if (reviewsJsonStr != null) {
+                    getPopularMoviesReviewFromJson(reviewsJsonStr , String.valueOf(movieIdList.get(i)));
+                }
+                java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat("/").concat(String.valueOf(movieIdList.get(i))).concat(URL.API_KEY_VIDEO).concat(api));
+                String videosJsonStr = getJsonString(videoUrl);
+                if (videosJsonStr != null) {
+                    getPopularMoviesVideoFromJson(videosJsonStr , String.valueOf(movieIdList.get(i)));
+                }
+            }
 
         } catch (IOException e) {
-            Log.e(TAG_LOG, e.getMessage(), e);
+            Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         } catch (JSONException e) {
-            Log.e(TAG_LOG, e.getMessage(), e);
+            Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         } finally {
             if (urlConnection != null) {
@@ -94,11 +96,11 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
                     reader.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e(TAG_LOG, "Error closing stream", e);
+                    Log.e(LOG_TAG, "Error closing stream", e);
                 }
             }
         }
-        return null;
+        return;
     }
 
     private String getJsonString(java.net.URL url) throws IOException {
@@ -125,8 +127,8 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
     /**
      * Get Movie review
-     * */
-    private void getPopularMoviesReviewFromJson(String reviewsJsonStr) throws JSONException{
+     */
+    private void getPopularMoviesReviewFromJson(String reviewsJsonStr, String movieId) throws JSONException {
         final String RESULT = "results";
         JSONObject jsonObject = new JSONObject(reviewsJsonStr);
         JSONArray reviewArray = jsonObject.getJSONArray(RESULT);
@@ -134,56 +136,69 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         Vector<ContentValues> cVector = new Vector<ContentValues>(reviewArray.length());
         for (int i = 0; i < reviewArray.length(); i++) {
             reviewObject = reviewArray.getJSONObject(i);
-            final String REVIEW_Id = "id";
+            final String REVIEW_ID = "id";
             final String AUTHOR = "author";
             final String CONTENT = "content";
             final String REVIEW_URL = "url";
-            String reviewId = reviewObject.getString(REVIEW_Id);
+            String reviewId = reviewObject.getString(REVIEW_ID);
             String author = reviewObject.getString(AUTHOR);
             String content = reviewObject.getString(CONTENT);
             String url = reviewObject.getString(REVIEW_URL);
             ContentValues reviewValues = new ContentValues();
+            reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID, movieId);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID, reviewId);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_AUTHOR, author);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_CONTENT, content);
             reviewValues.put(PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL, url);
             cVector.add(reviewValues);
+
+            if (isReviewExits(reviewId)) {
+                contentResolver.update(PopMoviesContract.ReviewEntry.CONTENT_URI, reviewValues, sMovieIdInReviewSelection(reviewId), null);
+            } else {
+                contentResolver.insert(PopMoviesContract.ReviewEntry.CONTENT_URI, reviewValues);
+            }
         }
-        tableBulkInsert(cVector, PopMoviesContract.ReviewEntry.CONTENT_URI);
+
     }
+
     /**
      * Get Movie trailer
-     * */
-    private void getPopularMoviesVideoFromJson(String videosJsonStr) throws JSONException{
+     */
+    private void getPopularMoviesVideoFromJson(String videosJsonStr, String movieId) throws JSONException {
         final String RESULT = "results";
         JSONObject jsonObject = new JSONObject(videosJsonStr);
-        JSONArray reviewArray = jsonObject.getJSONArray(RESULT);
-        JSONObject reviewObject;
-        Vector<ContentValues> cVector = new Vector<ContentValues>(reviewArray.length());
-        for (int i = 0; i < reviewArray.length(); i++) {
-            reviewObject = reviewArray.getJSONObject(i);
-            final String VIDEO_Id = "id";
+        JSONArray videoArray = jsonObject.getJSONArray(RESULT);
+        JSONObject videoObject;
+        Vector<ContentValues> cVector = new Vector<ContentValues>(videoArray.length());
+        for (int i = 0; i < videoArray.length(); i++) {
+            videoObject = videoArray.getJSONObject(i);
+            final String VIDEO_ID = "id";
             final String KEY = "key";
             final String NAME = "name";
             final String SITE = "site";
             final String SIZE = "size";
-            String videoId = reviewObject.getString(VIDEO_Id);
-            String key = reviewObject.getString(KEY);
-            String name = reviewObject.getString(NAME);
-            String site = reviewObject.getString(SITE);
-            String size = reviewObject.getString(SIZE);
-            ContentValues reviewValues = new ContentValues();
-            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_VIDEO_ID, videoId);
-            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_KEY, key);
-            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_NAME, name);
-            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_SITE, site);
-            reviewValues.put(PopMoviesContract.VideoEntry.CONTENT_SIZE, size);
-            cVector.add(reviewValues);
+            String videoId = videoObject.getString(VIDEO_ID);
+            String key = videoObject.getString(KEY);
+            String name = videoObject.getString(NAME);
+            String site = videoObject.getString(SITE);
+            String size = videoObject.getString(SIZE);
+            ContentValues videoValues = new ContentValues();
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID, movieId);
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_VIDEO_ID, videoId);
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_KEY, key);
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_NAME, name);
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_SITE, site);
+            videoValues.put(PopMoviesContract.VideoEntry.COLUMN_SIZE, size);
+            cVector.add(videoValues);
+            if (isVideoExits(videoId)) {
+                contentResolver.update(PopMoviesContract.VideoEntry.CONTENT_URI, videoValues, sMovieIdInVideoSelection(videoId), null);
+            } else {
+                contentResolver.insert(PopMoviesContract.VideoEntry.CONTENT_URI, videoValues);
+            }
         }
-        tableBulkInsert(cVector, PopMoviesContract.VideoEntry.CONTENT_URI);
     }
+
     /**
-     *
      * Get movie information
      */
     private void getPopularMoviesDataFromJson(String moviesJsonStr) throws JSONException {
@@ -208,10 +223,12 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
         int video;
         double vote_average;
         String genre_ids;
-
+        int videoNum;
+        int reviewNum;
 
         //get movie data
         for (int i = 0; i < moviesArray.length(); i++) {
+
             moviesObject = moviesArray.getJSONObject(i);
 
             poster_path = getPoster_path(moviesObject);
@@ -222,7 +239,7 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
             release_date = getReleaseDate(moviesObject);
 
-            movieId = getId(moviesObject);
+            movieIdList.add(getId(moviesObject));
 
             original_title = getOriginal_title(moviesObject);
 
@@ -244,11 +261,16 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
 
             ContentValues movieValues = new ContentValues();
 
+            videoNum = i;
+            reviewNum = i;
+
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_REVIEW_KEY, ++videoNum);
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_VIDEO_KEY, ++reviewNum);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_POSTER_PATH, poster_path);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ADULT, adult);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_OVERVIEW, overview);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_RELEASE_DATE, release_date);
-            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ID, movieId);
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID, movieIdList.get(i));
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_TITLE, original_title);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_LANGUAGE, original_language);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_TITLE, title);
@@ -258,24 +280,77 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_VIDEO, video);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_VOTE_AVERAGE, vote_average);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_GENRE_IDS, genre_ids);
-
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION, 1);
             cVector.add(movieValues);
+            if (isMovieIdExits(movieIdList.get(i))) {
+                contentResolver.update(PopMoviesContract.PopMoviesEntry.CONTENT_URI, movieValues, sMovieIdInMovieSelection(movieIdList.get(i)), null);
+            } else {
+                contentResolver.insert(PopMoviesContract.PopMoviesEntry.CONTENT_URI, movieValues);
+            }
         }
-        tableBulkInsert(cVector, PopMoviesContract.PopMoviesEntry.CONTENT_URI);
-
     }
-    private void tableBulkInsert (Vector<ContentValues> cVector, Uri uri) {
+
+    // 判断电影是否存在于"movie"里
+    private boolean isMovieIdExits(int movieId) {
+        Cursor c = contentResolver.query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, PopularMoviesFragment.POPULAR_MOVIES_COLUMNS, sMovieIdInMovieSelection(movieId), null, null);
+        if (c.getCount() > 0) {
+            c.close();
+            return true;
+        } else {
+            c.close();
+            return false;
+        }
+    }
+
+    private boolean isReviewExits(String reviewId) {
+
+        Cursor c = contentResolver.query(PopMoviesContract.ReviewEntry.CONTENT_URI, null, sMovieIdInReviewSelection(reviewId), null, null);
+        if (c.getCount() > 0) {
+            c.close();
+            return true;
+        } else {
+            c.close();
+            return false;
+        }
+    }
+    private boolean isVideoExits(String videoId) {
+        Cursor c = contentResolver.query(PopMoviesContract.VideoEntry.CONTENT_URI, null, sMovieIdInVideoSelection(videoId), null, null);
+        if (c.getCount() > 0) {
+            c.close();
+            return true;
+        } else {
+            c.close();
+            return false;
+        }
+    }
+
+    private String sMovieIdInMovieSelection(int movieId) {
+        return PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID + "=" + movieId;
+    }
+
+    private String sMovieIdInVideoSelection(String videoId) {
+        return PopMoviesContract.VideoEntry.COLUMN_VIDEO_ID + "= '" + videoId + "'";
+    }
+
+    private String sMovieIdInReviewSelection(String reviewId) {
+        return PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID + "= '" + reviewId + "'";
+    }
+
+    /**
+     * 插入数据
+     */
+    private void tableBulkInsert(Vector<ContentValues> cVector, Uri uri) {
         int inserted = 0;
         if (cVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[cVector.size()];
             cVector.toArray(cvArray);
-            inserted = mContext.getContentResolver().bulkInsert(uri, cvArray);
+            inserted = contentResolver.bulkInsert(uri, cvArray);
         }
-        Log.d(TAG_LOG, "PopularMoviesTask Completed. " + inserted + " Inserted");
+        Log.d(LOG_TAG, "PopularMoviesTask Completed. " + uri + ":" + inserted + " Inserted");
     }
 
     /**
-     * get imgpath
+     * get poster path
      */
     private String getPoster_path(JSONObject moviesObject) throws JSONException {
         final String POSTER_PATH = "poster_path";
@@ -479,5 +554,15 @@ public class PopularMoviesTask extends AsyncTask<String, Void, Void> {
             return s.substring(0, s.length() - 1) + "]";
         }
         return null;
+    }
+
+    public static class AlarmReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent i = new Intent(context, PopMoviesService.class);
+            context.startService(i);
+
+        }
     }
 }

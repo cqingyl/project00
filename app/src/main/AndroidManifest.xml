@@ -2,12 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cqing.project00">
 
+
+    <uses-permission
+        android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission
+        android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- SD卡写权限 -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- 使用相机 -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,20 +29,45 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.PopularMoviesActivity"
-            android:parentActivityName=".activity.MainActivity"
+        <activity
+            android:name=".activity.PopularMoviesActivity"
             android:label="@string/popular_movies"
-            />
-        <activity android:name=".activity.MovieDetailActivity"
-            android:parentActivityName=".activity.PopularMoviesActivity"
-            android:label="@string/movie_detail"/>
-        <activity android:name=".activity.CollectionActivity"
-            android:parentActivityName=".activity.PopularMoviesActivity"
-            android:label="@string/movie_collection"/>
+            android:parentActivityName=".activity.MainActivity" />
+        <activity
+            android:name=".activity.MovieDetailActivity"
+            android:label="@string/movie_detail"
+            android:launchMode="singleTop"
+            android:parentActivityName=".activity.PopularMoviesActivity" />
+
         <provider
-            android:authorities="com.cqing.project00"
             android:name=".data.PopMoviesProvider"
-            />
+            android:authorities="com.cqing.project00" />
+
+        <service android:name=".service.PopMoviesService" />
+        <receiver android:name=".service.PopMoviesService$AlarmReceiver" android:enabled="true"/>
+        <!-- SyncAdapter's dummy authentication service -->
+        <service android:name=".sync.PopMovieAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!-- The SyncAdapter service -->
+        <service
+            android:name=".sync.PopMovieSyncService"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter"
+                />
+        </service>
     </application>
 
 </manifest>

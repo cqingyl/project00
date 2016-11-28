@@ -51,7 +51,7 @@ public class TestDb extends AndroidTestCase {
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_ADULT);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_OVERVIEW);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_RELEASE_DATE);
-        locationColumnHashSet.add(PopMoviesEntry.COLUMN_ID);
+        locationColumnHashSet.add(PopMoviesEntry.COLUMN_MOVIE_ID);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_ORIGINAL_TITLE);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_ORIGINAL_LANGUAGE);
         locationColumnHashSet.add(PopMoviesEntry.COLUMN_TITLE);
