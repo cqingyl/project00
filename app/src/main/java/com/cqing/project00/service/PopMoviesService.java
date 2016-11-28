@@ -261,11 +261,7 @@ public class PopMoviesService extends IntentService {
 
             ContentValues movieValues = new ContentValues();
 
-            videoNum = i;
-            reviewNum = i;
 
-            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_REVIEW_KEY, ++videoNum);
-            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_VIDEO_KEY, ++reviewNum);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_POSTER_PATH, poster_path);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ADULT, adult);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_OVERVIEW, overview);

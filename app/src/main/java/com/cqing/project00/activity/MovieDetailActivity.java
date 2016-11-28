@@ -30,7 +30,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.collection:
-
                 break;
         }
         return super.onOptionsItemSelected(item);

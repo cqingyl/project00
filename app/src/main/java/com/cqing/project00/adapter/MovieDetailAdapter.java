@@ -6,18 +6,16 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cqing.project00.R;
 import com.cqing.project00.data.PopMoviesContract;
 import com.cqing.project00.other.RecyclerViewCursorAdapter;
-import com.cqing.project00.viewholder.ReviewViewHolder;
-import com.cqing.project00.viewholder.VideoViewHolder;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -32,7 +30,6 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
 
     private Context mContext;
     private Cursor mCursor;
-    private int numberOfVideos;
     private int numberOfReviews;
 
     private static final int COL_POPMOVIES_VOTE_AVERAGE = 13;
@@ -46,7 +43,10 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
     private static final int COL_REVIEW_CONTENT = 3;
     private static final int COL_VIDEO_NAME = 3;
 
-    private OnItemClickListener clickListener;
+    private static OnItemClickListener clickListener;
+    public void setNumberOfReviews(int numberOfReviews) {
+        this.numberOfReviews = numberOfReviews;
+    }
 
     public void setClickListener(OnItemClickListener clickListener) {
         this.clickListener = clickListener;
@@ -56,10 +56,9 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
         void onClick(View view, int position);
     }
 
-    public MovieDetailAdapter(Context context, Cursor cursor, int numberOfReviews) {
+    public MovieDetailAdapter(Context context, Cursor cursor) {
         super(cursor);
         this.mContext = context;
-        this.numberOfReviews = numberOfReviews;
     }
 
 
@@ -82,10 +81,10 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
                 return new DetailViewHolder(view);
             case VIEW_TYPE_REVIEW:
                 view = View.inflate(mContext, R.layout.item_review, null);
-                return new ReviewViewHolder(view, clickListener);
+                return new ReviewViewHolder(view);
             case VIEW_TYPE_VIDEO:
                 view = View.inflate(mContext, R.layout.item_video, null);
-                return new VideoViewHolder(view, clickListener);
+                return new VideoViewHolder(view);
             default:
                 throw new UnsupportedOperationException("Unknown viewType: " + viewType);
         }
@@ -124,14 +123,7 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
             detailViewHolder.tv_averages.setText(cursor.getString(COL_POPMOVIES_VOTE_AVERAGE));
             //初始化按钮状态
             collection = mCursor.getInt(COL_POPMOVIES_COLLECTION);
-            if (collection == 1) {
-                detailViewHolder.tv_btn_mark_as.setText(R.string.mark_as);
-                detailViewHolder.tv_btn_favorite.setText(R.string.favorite);
-            } else {
-                detailViewHolder.tv_btn_mark_as.setText(R.string.cancel);
-                detailViewHolder.tv_btn_favorite.setText(R.string.cancel_collection);
-            }
-            Log.i(TAG_LOG, "collection :" + collection);
+            isCollected(collection,detailViewHolder.tv_btn_favorite, detailViewHolder.tv_btn_mark_as);
         } else if (holder instanceof ReviewViewHolder) {
             ReviewViewHolder reviewViewHolder = (ReviewViewHolder) holder;
             reviewViewHolder.tv_review_author.setText(cursor.getString(COL_REVIEW_AUTHOR));
@@ -143,15 +135,15 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
     }
 
 
-    class DetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView tv_title;
-        private ImageView iv_movies;
-        private TextView tv_overview;
-        private TextView tv_data;
-        private TextView tv_averages;
-        private TextView tv_btn_mark_as;
-        private TextView tv_btn_favorite;
-        private RelativeLayout relativeLayout_btn;
+    public class DetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView tv_title;
+        public ImageView iv_movies;
+        public TextView tv_overview;
+        public TextView tv_data;
+        public TextView tv_averages;
+        public TextView tv_btn_mark_as;
+        public TextView tv_btn_favorite;
+        public RelativeLayout relativeLayout_btn;
 
         public DetailViewHolder(View itemView) {
             super(itemView);
@@ -166,24 +158,64 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
             relativeLayout_btn.setOnClickListener(this);
         }
 
+        //点击 DetailViewHolder的item 不会有效果，但是点击 item当中的一个按钮触发
+        //本来这里也应该通过OnItemClickListener 回调，但是回调后，实现那边不知怎么改变 tv_btn_favorite，tv_btn_mark_as。
+
         @Override
         public void onClick(View view) {
 
+            //更新按钮状态，点击时变成 “mark as favorite”或者“cancel collected”
             ContentResolver contentResolver = mContext.getContentResolver();
             ContentValues values = new ContentValues();
             values.put(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION, isCollected(1-collection, detailViewHolder.tv_btn_favorite, detailViewHolder.tv_btn_mark_as));
             contentResolver.update(PopMoviesContract.PopMoviesEntry.CONTENT_URI, values, sMovieIdSelection(movieId), null);
-            //更新按钮状态，点击时变成 “mark as favorite”或者“cancel collected”
             Cursor c = contentResolver.query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, null, sMovieIdSelection(movieId), null, null);
             c.moveToFirst();
             collection = c.getInt(c.getColumnIndex(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION));
             c.close();
-
-
-
-
         }
     }
 
+    public static class ReviewViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView tv_review_author;
+        public TextView tv_review_content;
+        public LinearLayout ll_review;
+        public ReviewViewHolder( View itemView) {
+            super(itemView);
+            tv_review_author = (TextView) itemView.findViewById(R.id.tv_review_author);
+            tv_review_content = (TextView) itemView.findViewById(R.id.tv_review_content);
+            ll_review = (LinearLayout) itemView.findViewById(R.id.ll_review);
+            ll_review.setOnClickListener(this);
+
+        }
+
+        //当点击属于 ReviewViewHolder 的item 会回调
+        @Override
+        public void onClick(View view) {
+            if (clickListener != null) {
+                clickListener.onClick(itemView, getAdapterPosition());
+            }
+
+        }
+    }
+    public static class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView tv_trailer;
+        public LinearLayout ll_trailer;
+
+        public VideoViewHolder(View itemView) {
+            super(itemView);
+            tv_trailer = (TextView) itemView.findViewById(R.id.tv_trailer);
+            ll_trailer = (LinearLayout) itemView.findViewById(R.id.ll_trailer);
+            ll_trailer.setOnClickListener(this);
+        }
+
+        //当点击属于 VideoViewHolder 的item 会回调
+        @Override
+        public void onClick(View view) {
+            if (clickListener != null) {
+                clickListener.onClick(itemView, getAdapterPosition());
+            }
+        }
+    }
 }
 

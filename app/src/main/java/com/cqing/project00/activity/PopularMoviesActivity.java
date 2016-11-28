@@ -8,12 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import com.cqing.project00.R;
 import com.cqing.project00.fragment.MovieDetailFragment;
 import com.cqing.project00.fragment.PopularMoviesFragment;
+import com.cqing.project00.sync.PopMovieSyncAdapter;
 
 public class PopularMoviesActivity extends AppCompatActivity implements PopularMoviesFragment.Callback{
 
     private static final String MOVIEDETAIL_TAG = "MDTAG";
     private static boolean mTwoPane;
-    private static String mPosition;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +30,8 @@ public class PopularMoviesActivity extends AppCompatActivity implements PopularM
         } else {
             mTwoPane = false;
         }
-
+        //开始初始化syncdapter
+        PopMovieSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override

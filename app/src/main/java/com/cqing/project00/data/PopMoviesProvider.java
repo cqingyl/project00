@@ -214,6 +214,7 @@ public class PopMoviesProvider extends ContentProvider {
                 Cursor [] cursors = new Cursor[]{detailCursor, reviewCursor,videoCursor };
                 MergeCursor mergeCursor = new MergeCursor(cursors);
                 mergeCursor.setNotificationUri(getContext().getContentResolver(), uri);
+                //当uri做出改变，mergeCursor 会获得相应通知。
                 mergeCursor.setNotificationUri(getContext().getContentResolver(), PopMoviesContract.PopMoviesEntry.CONTENT_URI);
                 return mergeCursor;
             default:
@@ -301,9 +302,6 @@ public class PopMoviesProvider extends ContentProvider {
                 break;
             case VIDEO:
                 rowUpdate = db.update(PopMoviesContract.VideoEntry.TABLE_NAME, values, selection, selectionArgs);
-                break;
-            case MOVIE_WITH_MOVIE_ID_WITH_MERGE:
-                rowUpdate = db.update(PopMoviesContract.PopMoviesEntry.TABLE_NAME, values, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

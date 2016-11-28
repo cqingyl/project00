@@ -3,11 +3,13 @@ package com.cqing.project00.fragment;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +23,6 @@ import android.widget.ListView;
 import com.cqing.project00.R;
 import com.cqing.project00.adapter.PopMoviesAdapter;
 import com.cqing.project00.data.PopMoviesContract;
-import com.cqing.project00.sync.PopMovieSyncAdapter;
 import com.cqing.project00.utils.ToastUtil;
 import com.cqing.project00.utils.Util;
 
@@ -62,13 +63,10 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
         public void ItemSelected(Uri dataUri);
     }
 
-    private void upDatePopMovie() {
-        PopMovieSyncAdapter.syncImmediately(getActivity());
-//        Intent alarmIntent = new Intent(getActivity(), PopMoviesService.AlarmReceiver.class);
-//        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0, alarmIntent, PendingIntent.FLAG_ONE_SHOT);//getBroadcast(context, 0, i, 0)
-//        //它只能触发一次,如果手机处于睡眠状态，应将它唤醒。
-//        AlarmManager am = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-//        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pi);
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -87,6 +85,7 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
         switch (item.getItemId()) {
             case R.id.collection:
                 ToastUtil.show(getActivity(), getString(R.string.collection));
@@ -96,7 +95,6 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
             case R.id.popular:
                 ToastUtil.show(getActivity(), getString(R.string.popularity));
                 if (Util.isNetworkConnected(getActivity())) {
-//                    upDatePopMovie();
                     movieState = POPULAR_STATE;
                     getLoaderManager().restartLoader(POPULAR_MOVIES_LOADER, null, this);
                 }
@@ -104,7 +102,6 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
             case R.id.average:
                 ToastUtil.show(getActivity(), getString(R.string.average));
                 if (Util.isNetworkConnected(getActivity())) {
-//                    upDatePopMovie();
                     movieState = VOTE_AVERAGE_STATE;
                     getLoaderManager().restartLoader(POPULAR_MOVIES_LOADER, null, this);
                 }
@@ -114,6 +111,15 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
         }
     }
 
+    Parcelable state;
+
+    @Override
+    public void onPause() {
+        // Save ListView state @ onPause
+        Log.d(TAG_LOG, "saving gridView state @ onPause");
+        state = gridView.onSaveInstanceState();
+        super.onPause();
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -131,32 +137,30 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
                     Callback callback = (Callback) getActivity();
                     callback.ItemSelected(PopMoviesContract.PopMoviesEntry
                             .buildPopMoviesWithMovieId(cursor.getLong(COL_POPMOVIES_MOVIEID)));
-//                    Intent intent = new Intent(getActivity(), MovieDetailActivity.class)
-//                            .setData(PopMoviesContract.PopMoviesEntry
-//                                    .buildPopMoviesWithMovieId(cursor.getLong(COL_POPMOVIES_MOVIEID)));
-//                    startActivity(intent);
                 }
-                    mPosition = position;
+                mPosition = position;
             }
         });
         if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_POSITION)){
             mPosition = savedInstanceState.getInt(SAVE_POSITION);
+        }
+        if(state != null) {
+            Log.d(TAG_LOG, "trying to restore gridView state..");
+            gridView.onRestoreInstanceState(state);
         }
         return rootView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
-
         getLoaderManager().initLoader(POPULAR_MOVIES_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = null;
 
+        String sortOrder = null;
         switch (movieState) {
             case POPULAR_STATE:
                 sortOrder = PopMoviesContract.PopMoviesEntry.COLUMN_POPULARITY + " DESC";
