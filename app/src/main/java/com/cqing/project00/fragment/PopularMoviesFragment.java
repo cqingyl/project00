@@ -26,6 +26,10 @@ import com.cqing.project00.data.PopMoviesContract;
 import com.cqing.project00.utils.ToastUtil;
 import com.cqing.project00.utils.Util;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * Created by Cqing on 2016/9/13.
  */
@@ -36,9 +40,10 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
     private final static int POPULAR_MOVIES_LOADER = 0;
     private int mPosition = ListView.INVALID_POSITION;
     private static final String SAVE_POSITION = "save_position";
-    private GridView gridView;
+    @BindView(R.id.gv_popular_movies) GridView gridView;
+    private Unbinder unbinder;
     public final static String PAR_KEY = "com.cqing.project00.fragment.par";
-    //电影状态 受欢迎还是评分高
+    //电影排序：受欢迎、评分高还是收藏
     public int movieState;
     public final static int POPULAR_STATE = 0;
     public final static int VOTE_AVERAGE_STATE = 1;
@@ -115,7 +120,7 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onPause() {
-        // Save ListView state @ onPause
+        // Save gridView state @ onPause
         Log.d(TAG_LOG, "saving gridView state @ onPause");
         state = gridView.onSaveInstanceState();
         super.onPause();
@@ -124,7 +129,7 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_popular_movies, container, false);
-        gridView = (GridView) rootView.findViewById(R.id.gv_popular_movies);
+        unbinder = ButterKnife.bind(this, rootView);
         adapter = new PopMoviesAdapter(getActivity(), null, 0);
         gridView.setAdapter(adapter);
         View view = View.inflate(getActivity(), R.layout.empty, null);
@@ -157,6 +162,12 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(POPULAR_MOVIES_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unbinder.unbind();
     }
 
     @Override

@@ -26,6 +26,10 @@
     <string name="btn6_toast">This button will launch my capstone app!</string>
     <string name="collection">Collection</string>
     <string name="movie_collection">MovieCollection</string>
+    <string name="review">REVIEW</string>
+    <string name="author">author: </string>
+    <string name="content">content: </string>
+    <string name="trailer">TRAILER</string>
 
     <!-- SyncAdapter related -->
     <string name="sync_account_type">project00.cqing.com</string>

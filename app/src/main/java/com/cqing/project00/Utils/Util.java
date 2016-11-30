@@ -1,10 +1,14 @@
 package com.cqing.project00.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * Created by Cqing on 2016/10/9.
@@ -35,7 +39,17 @@ public class Util {
             return true;
         }
     }
-
+    public static boolean isIntentionToUse(Context context, Intent intent){
+        if (intent.resolveActivity(context.getPackageManager()) != null)
+            return true;
+        else
+            return false;
+    }
+    //保留两位小数
+    public static double formatDouble(double d) {
+        BigDecimal bg = new BigDecimal(d).setScale(2, RoundingMode.UP);
+        return bg.doubleValue();
+    }
     /**
      * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
      * */

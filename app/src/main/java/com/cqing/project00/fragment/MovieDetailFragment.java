@@ -21,6 +21,10 @@ import com.cqing.project00.adapter.MovieDetailAdapter;
 import com.cqing.project00.data.PopMoviesContract;
 import com.cqing.project00.utils.Util;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
 /**
  * Created by Cqing on 2016/9/19.
  */
@@ -31,7 +35,8 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private final static String LOG_TAG = MovieDetailFragment.class.getSimpleName();
     private final static int DETAIL_LOADER = 1;
     public final static String MOVIE_DETAIL_URI = "URI";
-    private RecyclerView mMovieRecyclerView;
+    @BindView (R.id.movie_recycler_view) RecyclerView mMovieRecyclerView;
+    private Unbinder unbinder;
     private MovieDetailAdapter movieDetailAdapter;
     private Cursor cursor;
     private Uri mUri = null;
@@ -42,6 +47,9 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     private static final int COL_REVIEW_URL = 5;
     private static final int COL_VIDEO_KEY = 2;
     public String movieId;
+    private static final String YouTuBePkgName = "com.google.android.youtube";
+    private static final String YouTuBeProtocol = "vnd.youtube:";
+    private static final String YouTuBeUrl = "http://www.youtube.com/watch?v=";
 
     @Nullable
     @Override
@@ -53,7 +61,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             Log.d(LOG_TAG, "uri: " + mUri);
         }
         View rootView = inflater.inflate(R.layout.fragment_popular_detail, container, false);
-        mMovieRecyclerView = (RecyclerView) rootView.findViewById(R.id.movie_recycler_view);
+        unbinder = ButterKnife.bind(this,rootView);
         movieDetailAdapter = new MovieDetailAdapter(getActivity(), cursor);
         int numColumn = 1;
         mMovieRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), numColumn));
@@ -65,13 +73,18 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (mUri != null) {
             return new CursorLoader(getActivity(), PopMoviesContract.PopMoviesEntry.buildPopMoviesWithRT(Long.parseLong(movieId)), null, null, null, null);
         }
@@ -97,7 +110,6 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                             numberOfVideo++;
                     }
                 }
-
                 movieDetailAdapter.setNumberOfReviews(numberOfReview);
                 movieDetailAdapter.swapCursor(cursor);
 
@@ -111,17 +123,19 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
                         } else if (position < numberOfReview + 1){
                             Uri reviewUri = Uri.parse(cursor.getString(COL_REVIEW_URL));
                             Intent intent  = new Intent(Intent.ACTION_VIEW, reviewUri);
-                            getActivity().startActivity(intent);
+                            if(Util.isIntentionToUse(getActivity(), intent))
+                                getActivity().startActivity(intent);
                         } else if (position < numberOfVideo + numberOfReview + 1){
-                            String key = cursor.getString(COL_VIDEO_KEY);
+                            String youtubeKey = cursor.getString(COL_VIDEO_KEY);
                             Uri trailerUri = null;
-                            if (Util.isPkgInstalled(getActivity(),"com.google.android.youtube")){
-                                 trailerUri = Uri.parse("vnd.youtube:" + key);
+                            if (Util.isPkgInstalled(getActivity(),YouTuBePkgName)){
+                                 trailerUri = Uri.parse(YouTuBeProtocol + youtubeKey);
                             } else {
-                                 trailerUri = Uri.parse("http://www.youtube.com/watch?v=" + key);
+                                 trailerUri = Uri.parse(YouTuBeUrl + youtubeKey);
                             }
                             Intent intent   = new Intent(Intent.ACTION_VIEW, trailerUri);
-                            getActivity().startActivity(intent);
+                            if(Util.isIntentionToUse(getActivity(), intent))
+                                getActivity().startActivity(intent);
                         }
                     }
                 });

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
@@ -13,7 +15,6 @@
             android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
             android:paddingTop="@dimen/movie_detail_padding_top">
 
             <ImageView
@@ -22,7 +23,11 @@
                 android:layout_height="@dimen/iv_thumbnail_height"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginRight="@dimen/activity_horizontal_margin" />
+                tools:src="@drawable/error"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/app_name" />
 
             <TextView
                 android:id="@+id/tv_data"
@@ -30,25 +35,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_toRightOf="@+id/iv_movies"
+                tools:text="2012-10-15"
                 android:textSize="@dimen/text_date"
                 android:textColor="@color/black"/>
 
-            <TextView
-                android:id="@+id/tv_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_toRightOf="@+id/iv_movies"
-                android:textSize="@dimen/text_date"
-                android:textColor="@color/black"/>
-
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/relativeLayout_average"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:layout_below="@+id/tv_time"
+                android:layout_marginTop="4dp"
+                android:layout_below="@+id/tv_data"
+                android:orientation="horizontal"
                 android:layout_toRightOf="@+id/iv_movies">
 
                 <TextView
@@ -62,28 +60,58 @@
                     android:id="@+id/tv_averages"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toRightOf="@+id/tv_average_black"
-                    android:layout_alignBaseline="@+id/tv_average_black"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
                     android:textSize="@dimen/text_date"
+                    tools:text="8.3"
                     android:textColor="@color/black"/>
-            </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/relativeLayout_top_rated"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="2dp"
+                android:layout_below="@+id/relativeLayout_average"
+                android:orientation="horizontal"
+                android:layout_toRightOf="@+id/iv_movies">
+
+                <TextView
+                    android:id="@+id/tv_popularity_black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/popularity"
+                    android:textSize="@dimen/text_average"
+                    android:textColor="@color/black"/>
+                <TextView
+                    android:id="@+id/tv_popularity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:textSize="@dimen/text_date"
+                    tools:text="45.2"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
+
             <RelativeLayout
                 android:id="@+id/relativeLayout_btn"
                 style="@style/relativeLayoutButton"
-                android:layout_below="@+id/relativeLayout_average"
+                android:layout_marginTop="4dp"
+                android:layout_below="@+id/relativeLayout_top_rated"
                 android:layout_toRightOf="@+id/iv_movies">
 
                 <TextView
                     android:id="@+id/tv_btn_mark_as"
                     style="@style/relativeLayoutButtonTextView"
                     android:layout_centerHorizontal="true"
+                    tools:text="MARK_AS"
                     />
 
                 <TextView
                     android:id="@+id/tv_btn_favorite"
                     style="@style/relativeLayoutButtonTextView"
                     android:layout_below="@+id/tv_btn_mark_as"
+                    tools:text="FAVORITE"
                     />
             </RelativeLayout>
         </RelativeLayout>

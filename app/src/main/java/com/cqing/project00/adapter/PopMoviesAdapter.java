@@ -12,6 +12,9 @@ import com.cqing.project00.R;
 import com.cqing.project00.fragment.PopularMoviesFragment;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Cqing on 2016/10/27.
  */
@@ -35,7 +38,6 @@ public class PopMoviesAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         String url = cursor.getString(PopularMoviesFragment.COL_POPMOVIES_COLUMN_POSTER_PATH);
-//        Log.i("Adapter", "imgPath:"+ url +  "\n" + "view = " + view);
         Picasso.with(context)
                 .load(url)
                 .error(R.mipmap.ic_launcher)
@@ -43,10 +45,10 @@ public class PopMoviesAdapter extends CursorAdapter {
     }
 
     public class ViewHolder {
-        public ImageView iv;
+        @BindView(R.id.iv_popular_movies) ImageView iv;
 
         public ViewHolder(View view) {
-            iv = (ImageView) view.findViewById(R.id.iv_popular_movies);
+            ButterKnife.bind(this, view);
         }
     }
 }

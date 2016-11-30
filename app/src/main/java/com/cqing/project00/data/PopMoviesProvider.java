@@ -275,7 +275,6 @@ public class PopMoviesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)){
             case POPMOVIE:
                 rowUpdate = db.update(PopMoviesContract.PopMoviesEntry.TABLE_NAME, values, selection, selectionArgs);
-//                getContext().getContentResolver().notifyChange(mergeUri, null);
                 break;
             case REVIEW:
                 rowUpdate = db.update(PopMoviesContract.ReviewEntry.TABLE_NAME, values, selection, selectionArgs);

@@ -32,7 +32,7 @@ public class PopMoviesDbHelper extends SQLiteOpenHelper {
                 PopMoviesContract.ReviewEntry.COLUMN_CONTENT + " TEXT," +
                 PopMoviesContract.ReviewEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL," +
                 PopMoviesContract.ReviewEntry.COLUMN_REVIEW_URL + " TEXT," +
-                //这一段sql保证了插入的时候，如果（movie.review_id）出现重复，就会替代原先的。
+                //这一段sql保证了插入的时候，如果（review_id）出现重复，就会替代原先的。
                 " UNIQUE (" + PopMoviesContract.ReviewEntry.COLUMN_REVIEW_ID +
                 ") ON CONFLICT REPLACE" +
                 ");";
@@ -45,7 +45,7 @@ public class PopMoviesDbHelper extends SQLiteOpenHelper {
                 PopMoviesContract.VideoEntry.COLUMN_SITE + " TEXT," +
                 PopMoviesContract.VideoEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL," +
                 PopMoviesContract.VideoEntry.COLUMN_SIZE + " INTEGER," +
-                //这一段sql保证了插入的时候，如果（movie.COLUMN_VIDEO_ID）出现重复，就会替代原先的。
+                //这一段sql保证了插入的时候，如果（video_id)出现重复，就会替代原先的。
                 " UNIQUE (" + PopMoviesContract.VideoEntry.COLUMN_VIDEO_ID +
                 ") ON CONFLICT REPLACE" +
                 ");";
@@ -68,8 +68,8 @@ public class PopMoviesDbHelper extends SQLiteOpenHelper {
                 PopMoviesEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL," +
                 PopMoviesEntry.COLUMN_GENRE_IDS + " TEXT," +
                 PopMoviesEntry.COLUMN_COLLECTION + " INTEGER," +
-                //这一段sql保证了插入的时候，如果（movie.movie_id，movie.vote_average, movie.popularity）出现重复，就会替代原先的。
-                " UNIQUE (" + PopMoviesEntry.COLUMN_MOVIE_ID + ", "+ PopMoviesEntry.COLUMN_VOTE_AVERAGE + ", " + PopMoviesEntry.COLUMN_POPULARITY +
+                //这一段sql保证了插入的时候，如果（movie_id）出现重复，就会替代原先的。
+                " UNIQUE (" + PopMoviesEntry.COLUMN_MOVIE_ID +
                 ") ON CONFLICT REPLACE" +
                 ");";
         db.execSQL(SQL_CREATE_MOVIE_TABLE);

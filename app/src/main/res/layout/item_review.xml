@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center"
     android:minHeight="70dp"
     android:orientation="vertical"
@@ -23,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="REVIEW"
+            android:text="@string/review"
             android:textStyle="italic"
             android:textColor="@color/black"
             android:textSize="21sp" />
@@ -35,7 +36,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="author: "
+                android:text="@string/author"
+                android:layout_marginEnd="8dp"
                 android:textColor="@color/black"
                 android:textSize="21sp" />
 
@@ -44,6 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/black"
+                tools:text="Bob"
                 android:textSize="21sp" />
 
         </LinearLayout>
@@ -51,15 +54,15 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="content: "
+                android:layout_marginEnd="8dp"
+                android:text="@string/content"
                 android:textColor="@color/black"
-                android:textSize="18sp" />
+                android:textSize="21sp" />
 
             <TextView
                 android:id="@+id/tv_review_content"
@@ -67,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:maxEms="11"
                 android:singleLine="true"
-                android:text="this is great! thank for you bla bla "
+                tools:text="this is great! thank for you bla bla "
                 android:textColor="@color/black"
                 android:textSize="16sp" />
         </LinearLayout>

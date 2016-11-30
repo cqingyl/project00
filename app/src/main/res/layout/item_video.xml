@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center_vertical"
     android:minHeight="70dp"
     android:orientation="vertical"
@@ -24,7 +25,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TRAILER"
+            android:text="@string/trailer"
             android:textColor="@color/black"
             android:textSize="21sp"
             android:textStyle="italic" />
@@ -33,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
@@ -45,7 +47,7 @@
                 android:id="@+id/tv_trailer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="trailer1"
+                tools:text="trailer1"
                 android:textColor="@color/black"
                 android:textSize="@dimen/tv_overview" />
         </LinearLayout>
