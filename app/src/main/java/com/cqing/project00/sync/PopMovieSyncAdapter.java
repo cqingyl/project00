@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import android.util.Log;
 import com.cqing.project00.BuildConfig;
 import com.cqing.project00.R;
 import com.cqing.project00.data.PopMoviesContract;
-import com.cqing.project00.url.URL;
+import com.cqing.project00.url.MovieUrl;
 import com.cqing.project00.utils.Util;
 
 import org.json.JSONArray;
@@ -29,11 +30,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by Cqing on 2016/11/25.
@@ -45,14 +45,15 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
     // Interval at which to sync with the movie, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
 
     private HttpURLConnection urlConnection = null;
     private BufferedReader reader = null;
-    private List<Integer> movieIdList;
-
+    private List<Integer> popMovieIdList;
+    private static final int MOVIE_POPULAR_STATUS = 0;
+    private static final int MOVIE_TOP_STATUS = 1;
     private ContentResolver contentResolver;
 
     public PopMovieSyncAdapter(Context context, boolean autoInitialize) {
@@ -63,41 +64,59 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
         Log.d(LOG_TAG, "Starting sync");
         contentResolver = getContext().getContentResolver();
-        movieIdList = new ArrayList<Integer>();
-        String popMovieBaseUrl = URL.POPULAR;
-        String topMovieBaseUrl = URL.TOP_RATED;
-        String reviewBaseUrl = URL.HOST;
-        String videoBaseUrl = URL.HOST;
-        String apiKey = URL.API_KEY;
-        String api = BuildConfig.THE_MOVIE_DB_API_KEY;
+        popMovieIdList = new ArrayList<Integer>();
+        final String MOVIE_BASE_URL = MovieUrl.HOST;
+        final String POPULAR = "popular";
+        final String TOP_RATED = "top_rated";
+        final String REVIEW = "reviews";
+        final String VIDEO = "videos";
+        final String apiKey = "api_key";
         try {
             //http://api.themoviedb.org/3/movie/popular?api_key=[YOUR_API_KEY]
-            java.net.URL popMovieUrl = new java.net.URL(popMovieBaseUrl.concat(apiKey).concat(api));
+            Uri popMovieUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                    .appendPath(POPULAR)
+                    .appendQueryParameter(apiKey, BuildConfig.THE_MOVIE_DB_API_KEY)
+                    .build();
+            URL popMovieUrl = new URL(popMovieUri.toString());
             String popMoviesJsonStr = getJsonString(popMovieUrl);
             if (popMoviesJsonStr != null) {
-                getMoviesDataFromJson(0, popMoviesJsonStr);
+                getMoviesDataFromJson(MOVIE_POPULAR_STATUS, popMoviesJsonStr);
             }
-            Log.i(TAG, "pop finish");
             //http://api.themoviedb.org/3/movie/top_rated?api_key=[YOUR_API_KEY]
-            java.net.URL topMovieUrl = new java.net.URL(topMovieBaseUrl.concat(apiKey).concat(api));
+            Uri topMovieUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                    .appendPath(TOP_RATED)
+                    .appendQueryParameter(apiKey, BuildConfig.THE_MOVIE_DB_API_KEY)
+                    .build();
+            URL topMovieUrl = new URL(topMovieUri.toString());
             String topMoviesJsonStr = getJsonString(topMovieUrl);
             if (topMoviesJsonStr != null) {
-                getMoviesDataFromJson(movieIdList.size(), topMoviesJsonStr);
+                getMoviesDataFromJson(MOVIE_TOP_STATUS, topMoviesJsonStr);
             }
-            //
-            for (int i = 0; i < movieIdList.size(); i++) {
-                java.net.URL reviewUrl = new java.net.URL(reviewBaseUrl.concat("/").concat(String.valueOf(movieIdList.get(i))).concat(URL.API_KEY_REVIEW).concat(api));
+            for (int i = 0; i < popMovieIdList.size(); i++) {
+                //https://api.themoviedb.org/3/movie/157336/reviews?api_key=[YOUR_API_KEY]
+                Uri reviewUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                        .appendPath(String.valueOf(popMovieIdList.get(i)))
+                        .appendPath(REVIEW)
+                        .appendQueryParameter(apiKey, BuildConfig.THE_MOVIE_DB_API_KEY)
+                        .build();
+                URL reviewUrl = new URL(reviewUri.toString());
                 String reviewsJsonStr = getJsonString(reviewUrl);
                 if (reviewsJsonStr != null) {
-                    getPopularMoviesReviewFromJson(reviewsJsonStr , String.valueOf(movieIdList.get(i)));
+                    getPopularMoviesReviewFromJson(reviewsJsonStr, String.valueOf(popMovieIdList.get(i)));
                 }
-                java.net.URL videoUrl = new java.net.URL(videoBaseUrl.concat("/").concat(String.valueOf(movieIdList.get(i))).concat(URL.API_KEY_VIDEO).concat(api));
+                //https://api.themoviedb.org/3/movie/157336/videos?api_key=[YOUR_API_KEY]
+                Uri videoUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                        .appendPath(String.valueOf(popMovieIdList.get(i)))
+                        .appendPath(VIDEO)
+                        .appendQueryParameter(apiKey, BuildConfig.THE_MOVIE_DB_API_KEY)
+                        .build();
+                URL videoUrl = new URL(videoUri.toString());
                 String videosJsonStr = getJsonString(videoUrl);
                 if (videosJsonStr != null) {
-                    getPopularMoviesVideoFromJson(videosJsonStr , String.valueOf(movieIdList.get(i)));
+                    getPopularMoviesVideoFromJson(videosJsonStr, String.valueOf(popMovieIdList.get(i)));
                 }
             }
-
+            Log.d(LOG_TAG, "sync Completed");
         } catch (IOException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
@@ -171,7 +190,6 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             cVector.add(reviewValues);
         }
         tableBulkInsert(cVector, PopMoviesContract.ReviewEntry.CONTENT_URI);
-
     }
 
     /**
@@ -209,9 +227,10 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     /**
      * Get movie information
-     * @param position move the start position of the movieIdList
+     *
+     * @param status
      */
-    private void getMoviesDataFromJson(int position, String moviesJsonStr) throws JSONException {
+    private void getMoviesDataFromJson(int status, String moviesJsonStr) throws JSONException {
 
         final String RESULT = "results";
         JSONObject jsonObject = new JSONObject(moviesJsonStr);
@@ -231,33 +250,34 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
         double popularity;
         int vote_count;
         int video;
+        int movieId;
         double vote_average;
         String genre_ids;
-
-        //get movie data
-        for (int i = 0; i < moviesArray.length(); i++, position++) {
+        int bothInPopAndTop;
+        for (int i = 0; i < moviesArray.length(); i++) {
             moviesObject = moviesArray.getJSONObject(i);
             poster_path = getPoster_path(moviesObject);
             adult = getAdult(moviesObject);
             overview = getOverview(moviesObject);
             release_date = getReleaseDate(moviesObject);
-            movieIdList.add(getId(moviesObject));
             original_title = getOriginal_title(moviesObject);
             original_language = getOriginal_language(moviesObject);
             title = getTitle(moviesObject);
+            movieId = getId(moviesObject);
+            popMovieIdList.add(movieId);
             backdrop_path = getBackdrop_path(moviesObject);
             popularity = getPopularity(moviesObject);
             vote_count = getVote_count(moviesObject);
             video = getVideo(moviesObject);
             vote_average = getAverages(moviesObject);
             genre_ids = getGenre_ids(moviesObject);
-            ContentValues movieValues = new ContentValues();
 
+            ContentValues movieValues = new ContentValues();
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_POSTER_PATH, poster_path);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ADULT, adult);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_OVERVIEW, overview);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_RELEASE_DATE, release_date);
-            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID, movieIdList.get(position));
+            movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID, movieId);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_TITLE, original_title);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_ORIGINAL_LANGUAGE, original_language);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_TITLE, title);
@@ -268,11 +288,58 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_VOTE_AVERAGE, vote_average);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_GENRE_IDS, genre_ids);
             movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION, 1);
+                //如果是popular就让表里的most_popular为0，如果是top就让表里的most_top为0，是top且如果 movieId在list里面，就让表popular和top都为0
+                switch (status) {
+                    case MOVIE_POPULAR_STATUS:
+                        movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOST_POPULARITY, 0);
+                        break;
+                    case MOVIE_TOP_STATUS:
+                        movieValues.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOST_TOP, 0);
+                        break;
+                }
             cVector.add(movieValues);
         }
         tableBulkInsert(cVector, PopMoviesContract.PopMoviesEntry.CONTENT_URI);
+            bothInPopAndTop = isBothInPopAndTop(popMovieIdList);
+        if (bothInPopAndTop != -1){
+            Log.d(LOG_TAG, "bothInPopAndTop: " + bothInPopAndTop);
+            ContentValues values = new ContentValues();
+            values.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOST_POPULARITY, 0);
+            values.put(PopMoviesContract.PopMoviesEntry.COLUMN_MOST_TOP, 0);
+            getContext().getContentResolver().update(PopMoviesContract.PopMoviesEntry.CONTENT_URI,
+                    values,
+                    PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID + "=?",
+                    new String[]{String.valueOf(bothInPopAndTop)}
+                    );
+        }
     }
 
+    public int isBothInPopAndTop(List list) {
+        for (int i = 0; i < list.size() - 1; i++) {
+            for (int j = list.size() - 1; j > i; j--) {
+                if (list.get(j).equals(list.get(i))){
+                    return (int) list.get(i);
+                }
+            }
+        }
+        return -1;
+    }
+    private boolean isMovieIdExits(int movieId) {
+        Cursor c = null;
+        try {
+            c = getContext().getContentResolver().query(PopMoviesContract.PopMoviesEntry.CONTENT_URI,
+                    new String[]{PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID},
+                    PopMoviesContract.PopMoviesEntry.COLUMN_MOVIE_ID + "=?",
+                    new String[]{String.valueOf(movieId)},
+                    null
+            );
+            return c != null;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
+        }
+    }
     /**
      * 插入数据
      */
@@ -283,7 +350,7 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
             cVector.toArray(cvArray);
             inserted = contentResolver.bulkInsert(uri, cvArray);
         }
-        Log.d(LOG_TAG, "PopularMoviesTask Completed. " + uri + ":" + inserted + " Inserted");
+        Log.d(LOG_TAG, uri.getLastPathSegment() + " insert Completed. " + " Inserted: " + inserted);
     }
 
     /**
@@ -293,14 +360,10 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
         final String POSTER_PATH = "poster_path";
         String moviesPath;
         if (!moviesObject.isNull(POSTER_PATH)) {
-
             moviesPath = moviesObject.getString(POSTER_PATH);
-
-            String baseUrl = URL.SERVICE_IMAGE_URL;
-            String picSize = URL.SERVICE_IMAGE_URL_PIC_SIZE;
-            String imgPath = baseUrl.concat(picSize).concat(moviesPath);
-//             Log.i(TAG_LOG, imgPath);
-            return imgPath;
+            String baseUrl = MovieUrl.SERVICE_IMAGE_URL;
+            String picSize = MovieUrl.SERVICE_IMAGE_URL_PIC_SIZE;
+            return baseUrl.concat(picSize).concat(moviesPath);
         }
         return null;
     }
@@ -434,14 +497,10 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
         final String BACKDROP_PATH = "backdrop_path";
         String moviesPath;
         if (!moviesObject.isNull(BACKDROP_PATH)) {
-
             moviesPath = moviesObject.getString(BACKDROP_PATH);
-
-            String baseUrl = URL.SERVICE_IMAGE_URL;
-            String picSize = URL.SERVICE_IMAGE_URL_PIC_SIZE;
-            String imgPath = baseUrl.concat(picSize).concat(moviesPath);
-            Log.d(LOG_TAG, imgPath);
-            return imgPath;
+            String baseUrl = MovieUrl.SERVICE_IMAGE_URL;
+            String picSize = MovieUrl.SERVICE_IMAGE_URL_PIC_SIZE;
+            return baseUrl.concat(picSize).concat(moviesPath);
         }
         return null;
     }
@@ -514,6 +573,7 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
     /**
      * Helper method to have the sync adapter sync immediately
+     *
      * @param context The context used to access the account service
      */
     public static void syncImmediately(Context context) {
@@ -542,7 +602,7 @@ public class PopMovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
 
         // If the password doesn't exist, the account doesn't exist
-        if ( null == accountManager.getPassword(newAccount) ) {
+        if (null == accountManager.getPassword(newAccount)) {
 
         /*
          * Add the account and account type, no password or user data

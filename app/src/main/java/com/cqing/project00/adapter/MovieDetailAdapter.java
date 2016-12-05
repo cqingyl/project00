@@ -73,7 +73,6 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
     }
 
 
-
     @Override
     public int getItemViewType(int position) {
         if (position == 0)
@@ -131,7 +130,7 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
             detailViewHolder.tv_popularity.setText(cursor.getString(COL_POPMOVIES_POPULARITY));
             //初始化按钮状态
             collection = cursor.getInt(COL_POPMOVIES_COLLECTION);
-            changeButton(collection,detailViewHolder.tv_btn_favorite, detailViewHolder.tv_btn_mark_as);
+            changeButton(collection, detailViewHolder.tv_btn_favorite, detailViewHolder.tv_btn_mark_as);
         } else if (holder instanceof ReviewViewHolder) {
             ReviewViewHolder reviewViewHolder = (ReviewViewHolder) holder;
             reviewViewHolder.tv_review_author.setText(cursor.getString(COL_REVIEW_AUTHOR));
@@ -144,21 +143,31 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
 
 
     public class DetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R.id.tv_title) TextView tv_title;
-        @BindView(R.id.iv_movies) ImageView iv_movies;
-        @BindView(R.id.tv_overview) TextView tv_overview;
-        @BindView(R.id.tv_data) TextView tv_data;
-        @BindView(R.id.tv_averages) TextView tv_averages;
-        @BindView(R.id.tv_btn_mark_as) TextView tv_btn_mark_as;
-        @BindView(R.id.tv_btn_favorite) TextView tv_btn_favorite;
-        @BindView(R.id.relativeLayout_btn) RelativeLayout relativeLayout_btn;
-        @BindView(R.id.tv_popularity) TextView tv_popularity;
+        @BindView(R.id.tv_title)
+        TextView tv_title;
+        @BindView(R.id.iv_movies)
+        ImageView iv_movies;
+        @BindView(R.id.tv_overview)
+        TextView tv_overview;
+        @BindView(R.id.tv_data)
+        TextView tv_data;
+        @BindView(R.id.tv_averages)
+        TextView tv_averages;
+        @BindView(R.id.tv_btn_mark_as)
+        TextView tv_btn_mark_as;
+        @BindView(R.id.tv_btn_favorite)
+        TextView tv_btn_favorite;
+        @BindView(R.id.relativeLayout_btn)
+        RelativeLayout relativeLayout_btn;
+        @BindView(R.id.tv_popularity)
+        TextView tv_popularity;
 
         public DetailViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             relativeLayout_btn.setOnClickListener(this);
         }
+
         //点击 DetailViewHolder的item 不会有效果，但是点击 item当中的一个按钮触发
         //本来这里也应该通过OnItemClickListener 回调，但是回调后，实现那边不知怎么改变 tv_btn_favorite，tv_btn_mark_as。
         @Override
@@ -168,17 +177,26 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
         }
     }
 
-    public class ButtonAsyncTask extends AsyncTask<Void, Void, Void>{
+    public class ButtonAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
             ContentValues values = new ContentValues();
-            values.put(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION, 1-collection);
+            values.put(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION, 1 - collection);
             contentResolver.update(PopMoviesContract.PopMoviesEntry.CONTENT_URI, values, sMovieIdSelection(movieId), null);
-            Cursor c = contentResolver.query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, null, sMovieIdSelection(movieId), null, null);
-            c.moveToFirst();
-            collection = c.getInt(c.getColumnIndex(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION));
-            c.close();
+            Cursor c = null;
+            try {
+                c = contentResolver.query(PopMoviesContract.PopMoviesEntry.CONTENT_URI, null, sMovieIdSelection(movieId), null, null);
+                if (c != null && c.moveToFirst()) {
+                    collection = c.getInt(c.getColumnIndex(PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (c != null)
+                    c.close();
+            }
+
             return null;
         }
 
@@ -190,10 +208,14 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
     }
 
     public static class ReviewViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R.id.tv_review_author) TextView tv_review_author;
-        @BindView(R.id.tv_review_content) TextView tv_review_content;
-        @BindView(R.id.ll_review) LinearLayout ll_review;
-        public ReviewViewHolder( View itemView) {
+        @BindView(R.id.tv_review_author)
+        TextView tv_review_author;
+        @BindView(R.id.tv_review_content)
+        TextView tv_review_content;
+        @BindView(R.id.ll_review)
+        LinearLayout ll_review;
+
+        public ReviewViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
             ll_review.setOnClickListener(this);
@@ -209,9 +231,12 @@ public class MovieDetailAdapter extends RecyclerViewCursorAdapter<RecyclerView.V
 
         }
     }
+
     public static class VideoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(R.id.tv_trailer) TextView tv_trailer;
-        @BindView(R.id.ll_trailer) LinearLayout ll_trailer;
+        @BindView(R.id.tv_trailer)
+        TextView tv_trailer;
+        @BindView(R.id.ll_trailer)
+        LinearLayout ll_trailer;
 
         public VideoViewHolder(View itemView) {
             super(itemView);

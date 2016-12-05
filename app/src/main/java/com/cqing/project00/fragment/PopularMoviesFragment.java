@@ -177,14 +177,14 @@ public class PopularMoviesFragment extends Fragment implements LoaderManager.Loa
         switch (movieState) {
             case POPULAR_STATE:
                 sortOrder = PopMoviesContract.PopMoviesEntry.COLUMN_POPULARITY + " DESC";
-                    return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, null, null, sortOrder);
+                    return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_MOST_POPULARITY + "=?", new String[]{"0"}, sortOrder);
             case VOTE_AVERAGE_STATE:
                 sortOrder = PopMoviesContract.PopMoviesEntry.COLUMN_VOTE_AVERAGE + " DESC";
-                    return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, null, null, sortOrder);
+                    return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_MOST_TOP + "=?", new String[]{"0"}, sortOrder);
             case COLLECTION_STATE:
-                return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION + "=0", null, null);
+                return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_COLLECTION + "=?", new String[]{"0"}, null);
             default:
-                return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, null, null, null);
+                return new CursorLoader(getActivity(), movieUri, POPULAR_MOVIES_COLUMNS, PopMoviesContract.PopMoviesEntry.COLUMN_MOST_POPULARITY + "=?", new String[]{"0"}, null);
         }
     }
 

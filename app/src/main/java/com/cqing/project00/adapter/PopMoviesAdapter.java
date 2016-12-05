@@ -40,12 +40,13 @@ public class PopMoviesAdapter extends CursorAdapter {
         String url = cursor.getString(PopularMoviesFragment.COL_POPMOVIES_COLUMN_POSTER_PATH);
         Picasso.with(context)
                 .load(url)
-                .error(R.mipmap.ic_launcher)
+                .error(R.drawable.error)
                 .into(viewHolder.iv);
     }
 
     public class ViewHolder {
-        @BindView(R.id.iv_popular_movies) ImageView iv;
+        @BindView(R.id.iv_popular_movies)
+        ImageView iv;
 
         public ViewHolder(View view) {
             ButterKnife.bind(this, view);

@@ -82,6 +82,8 @@ public class PopMoviesContract {
         public static final String COLUMN_VOTE_AVERAGE = "vote_average";
         public static final String COLUMN_GENRE_IDS = "genre_ids";
         public static final String COLUMN_COLLECTION = "collection";
+        public static final String COLUMN_MOST_POPULARITY = "most_popularity";
+        public static final String COLUMN_MOST_TOP = "most_top";
 
         public static Uri buildPopMoviesUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

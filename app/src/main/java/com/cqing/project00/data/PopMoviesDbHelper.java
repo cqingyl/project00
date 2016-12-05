@@ -68,6 +68,8 @@ public class PopMoviesDbHelper extends SQLiteOpenHelper {
                 PopMoviesEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL," +
                 PopMoviesEntry.COLUMN_GENRE_IDS + " TEXT," +
                 PopMoviesEntry.COLUMN_COLLECTION + " INTEGER," +
+                PopMoviesEntry.COLUMN_MOST_POPULARITY + " INTEGER," +
+                PopMoviesEntry.COLUMN_MOST_TOP + " INTEGER," +
                 //这一段sql保证了插入的时候，如果（movie_id）出现重复，就会替代原先的。
                 " UNIQUE (" + PopMoviesEntry.COLUMN_MOVIE_ID +
                 ") ON CONFLICT REPLACE" +
